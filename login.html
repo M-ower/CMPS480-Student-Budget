@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Login</title>
+
+    <!-- Use the same CSS as the main website -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>Student Budget Tracker</h1>
+        <p>Login to access your account.</p>
+    </header>
+
+    <main>
+
+        <!-- Basic login prototype -->
+        <section>
+
+            <h2>Login</h2>
+
+            <form id="loginForm">
+
+                <label for="email">Email</label>
+
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="student@email.com"
+                    required
+                >
+
+                <label for="password">Password</label>
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Password"
+                    required
+                >
+
+                <button type="submit">Login</button>
+
+            </form>
+
+            <p id="loginMessage"></p>
+
+        </section>
+
+        <p>
+            <a href="index.html">Back to Dashboard</a>
+        </p>
+
+    </main>
+
+
+    <script>
+        // Temporary login prototype.
+        // Real authentication will later be handled
+        // by the Node.js / Express backend.
+
+        const loginForm = document.getElementById("loginForm");
+        const loginMessage = document.getElementById("loginMessage");
+
+        loginForm.addEventListener("submit", function(event) {
+
+            // Prevent page refresh
+            event.preventDefault();
+
+            const email =
+                document.getElementById("email").value;
+
+            // Basic prototype message
+            loginMessage.textContent =
+                "Login information submitted for " + email;
+        });
+    </script>
+
+</body>
+
+</html>

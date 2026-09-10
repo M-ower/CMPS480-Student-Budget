@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Monthly Budget</title>
+
+    <!-- Use the same CSS as the main website -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>Student Budget Tracker</h1>
+        <p>Set and manage your monthly budget.</p>
+    </header>
+
+    <main>
+
+        <!-- Monthly Budget Section -->
+        <section>
+            <h2>Monthly Budget</h2>
+
+            <form id="budgetForm">
+
+                <label for="budgetAmount">Budget Amount</label>
+
+                <input
+                    type="number"
+                    id="budgetAmount"
+                    placeholder="Example: 1000"
+                    min="1"
+                    step="0.01"
+                    required
+                >
+
+                <button type="submit">Save Budget</button>
+
+            </form>
+
+            <!-- Simple results for testing -->
+            <h3>Current Budget</h3>
+
+            <p>
+                Monthly Budget:
+                $<span id="currentBudget">0.00</span>
+            </p>
+
+        </section>
+
+        <p>
+            <a href="index.html">Back to Dashboard</a>
+        </p>
+
+    </main>
+
+
+    <script>
+        // Basic budget prototype
+        const budgetForm = document.getElementById("budgetForm");
+        const currentBudget = document.getElementById("currentBudget");
+
+        budgetForm.addEventListener("submit", function(event) {
+
+            // Prevent the page from refreshing
+            event.preventDefault();
+
+            const amount =
+                Number(document.getElementById("budgetAmount").value);
+
+            // Display the entered budget
+            currentBudget.textContent = amount.toFixed(2);
+        });
+    </script>
+
+</body>
+
+</html>
