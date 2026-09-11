@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Spending Analytics</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+
+<header class="main-header">
+
+    <div class="header-content">
+
+        <div>
+
+            <h1>Student Budget Tracker</h1>
+
+            <p>Understand where your money is going.</p>
+
+        </div>
+
+        <a href="login.html" class="login-link">Login</a>
+
+    </div>
+
+</header>
+
+
+<nav class="navigation">
+
+    <div class="nav-container">
+
+        <a href="index.html">Dashboard</a>
+
+        <a href="budget.html">Monthly Budget</a>
+
+        <a href="analytics.html" class="active">Analytics</a>
+
+    </div>
+
+</nav>
+
+
+<main class="container">
+
+    <section class="welcome-section">
+
+        <h2>Spending Analytics</h2>
+
+        <p>
+            Review your income, expenses, balance, and spending categories.
+        </p>
+
+    </section>
+
+
+    <!-- ANALYTICS SUMMARY -->
+
+    <section class="summary-grid">
+
+        <div class="summary-card income-card">
+
+            <div class="card-icon">+</div>
+
+            <div>
+                <h3>Total Income</h3>
+                <p id="analyticsIncome">$0.00</p>
+            </div>
+
+        </div>
+
+
+        <div class="summary-card expense-card">
+
+            <div class="card-icon">−</div>
+
+            <div>
+                <h3>Total Expenses</h3>
+                <p id="analyticsExpenses">$0.00</p>
+            </div>
+
+        </div>
+
+
+        <div class="summary-card balance-card">
+
+            <div class="card-icon">$</div>
+
+            <div>
+                <h3>Balance</h3>
+                <p id="analyticsBalance">$0.00</p>
+            </div>
+
+        </div>
+
+
+        <div class="summary-card budget-card">
+
+            <div class="card-icon">✓</div>
+
+            <div>
+                <h3>Remaining Budget</h3>
+                <p id="remainingBudget">$0.00</p>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- CATEGORY BREAKDOWN -->
+
+    <section class="content-card">
+
+        <div class="section-title">
+
+            <div>
+
+                <h2>Expenses by Category</h2>
+
+                <p>
+                    See how much you are spending in each category.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div id="categoryList" class="category-list">
+
+        </div>
+
+
+        <p id="analyticsEmptyMessage" class="empty-message">
+            Add some expenses to see your spending breakdown.
+        </p>
+
+    </section>
+
+
+    <!-- BUDGET STATUS -->
+
+    <section class="content-card">
+
+        <h2>Budget Status</h2>
+
+        <p id="budgetStatus">
+            Set a monthly budget to see your budget status.
+        </p>
+
+        <div class="progress-container">
+
+            <div
+                id="budgetProgress"
+                class="progress-bar"
+            ></div>
+
+        </div>
+
+    </section>
+
+
+    <div class="back-link">
+
+        <a href="index.html">← Back to Dashboard</a>
+
+    </div>
+
+</main>
+
+
+<footer>
+
+    <p>Student Budget Tracker &copy; 2026</p>
+
+</footer>
+
+
+<script src="app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Budget Tracker</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="main-header">
+
+    <div class="header-content">
+        <div>
+            <h1>Student Budget Tracker</h1>
+            <p>Manage your money and keep track of your spending.</p>
+        </div>
+
+        <a href="login.html" class="login-link">Login</a>
+    </div>
+
+</header>
+
+
+<nav class="navigation">
+
+    <div class="nav-container">
+
+        <a href="index.html" class="active">Dashboard</a>
+
+        <a href="budget.html">Monthly Budget</a>
+
+        <a href="analytics.html">Analytics</a>
+
+    </div>
+
+</nav>
+
+
+<main class="container">
+
+    <section class="welcome-section">
+
+        <h2>Budget Dashboard</h2>
+
+        <p>
+            Keep track of your income, expenses, and monthly spending.
+        </p>
+
+    </section>
+
+
+    <!-- SUMMARY CARDS -->
+
+    <section class="summary-grid">
+
+        <div class="summary-card income-card">
+
+            <div class="card-icon">+</div>
+
+            <div>
+                <h3>Total Income</h3>
+                <p id="income">$0.00</p>
+            </div>
+
+        </div>
+
+
+        <div class="summary-card expense-card">
+
+            <div class="card-icon">−</div>
+
+            <div>
+                <h3>Total Expenses</h3>
+                <p id="expenses">$0.00</p>
+            </div>
+
+        </div>
+
+
+        <div class="summary-card balance-card">
+
+            <div class="card-icon">$</div>
+
+            <div>
+                <h3>Current Balance</h3>
+                <p id="balance">$0.00</p>
+            </div>
+
+        </div>
+
+
+        <div class="summary-card budget-card">
+
+            <div class="card-icon">✓</div>
+
+            <div>
+                <h3>Monthly Budget</h3>
+                <p id="monthlyBudget">$0.00</p>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ADD TRANSACTION -->
+
+    <section class="content-card">
+
+        <div class="section-title">
+
+            <div>
+                <h2>Add Transaction</h2>
+                <p>Enter your income or an expense.</p>
+            </div>
+
+        </div>
+
+
+        <form id="transactionForm" class="transaction-form">
+
+            <div class="form-group">
+
+                <label for="type">Transaction Type</label>
+
+                <select id="type" required>
+
+                    <option value="expense">Expense</option>
+
+                    <option value="income">Income</option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="description">Description</label>
+
+                <input
+                    type="text"
+                    id="description"
+                    placeholder="Example: Groceries"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="category">Category</label>
+
+                <select id="category" required>
+
+                    <option value="Food">Food</option>
+
+                    <option value="Housing">Housing</option>
+
+                    <option value="Transportation">Transportation</option>
+
+                    <option value="School">School</option>
+
+                    <option value="Entertainment">Entertainment</option>
+
+                    <option value="Bills">Bills</option>
+
+                    <option value="Other">Other</option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="amount">Amount</label>
+
+                <input
+                    type="number"
+                    id="amount"
+                    placeholder="0.00"
+                    min="0.01"
+                    step="0.01"
+                    required
+                >
+
+            </div>
+
+
+            <button type="submit" class="primary-button">
+                Add Transaction
+            </button>
+
+        </form>
+
+
+        <p id="transactionMessage" class="message"></p>
+
+    </section>
+
+
+    <!-- TRANSACTION HISTORY -->
+
+    <section class="content-card">
+
+        <div class="section-title transaction-header">
+
+            <div>
+                <h2>Recent Transactions</h2>
+                <p>Your latest income and expenses.</p>
+            </div>
+
+            <button
+                id="clearHistory"
+                class="delete-button"
+                type="button"
+            >
+                Clear History
+            </button>
+
+        </div>
+
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="transactionList">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <p id="emptyMessage" class="empty-message">
+            No transactions have been added yet.
+        </p>
+
+    </section>
+
+</main>
+
+
+<footer>
+
+    <p>Student Budget Tracker &copy; 2026</p>
+
+</footer>
+
+
+<script src="app.js"></script>
+
+</body>
+</html>

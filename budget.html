@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Monthly Budget</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+
+<header class="main-header">
+
+    <div class="header-content">
+
+        <div>
+
+            <h1>Student Budget Tracker</h1>
+
+            <p>Set and manage your monthly spending budget.</p>
+
+        </div>
+
+        <a href="login.html" class="login-link">Login</a>
+
+    </div>
+
+</header>
+
+
+<nav class="navigation">
+
+    <div class="nav-container">
+
+        <a href="index.html">Dashboard</a>
+
+        <a href="budget.html" class="active">Monthly Budget</a>
+
+        <a href="analytics.html">Analytics</a>
+
+    </div>
+
+</nav>
+
+
+<main class="container">
+
+    <section class="welcome-section">
+
+        <h2>Monthly Budget</h2>
+
+        <p>
+            Set a spending limit and keep track of how much you have left.
+        </p>
+
+    </section>
+
+
+    <!-- SET BUDGET -->
+
+    <section class="content-card">
+
+        <div class="section-title">
+
+            <div>
+
+                <h2>Set Your Budget</h2>
+
+                <p>
+                    Enter the amount you plan to spend this month.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <form id="budgetForm" class="budget-form">
+
+            <div class="form-group">
+
+                <label for="budgetAmount">
+                    Monthly Budget Amount
+                </label>
+
+                <input
+                    type="number"
+                    id="budgetAmount"
+                    placeholder="Example: 1000"
+                    min="1"
+                    step="0.01"
+                    required
+                >
+
+            </div>
+
+
+            <button type="submit" class="primary-button">
+                Save Budget
+            </button>
+
+        </form>
+
+
+        <p id="budgetMessage" class="message"></p>
+
+    </section>
+
+
+    <!-- CURRENT BUDGET -->
+
+    <section class="content-card">
+
+        <h2>Current Budget</h2>
+
+
+        <div class="budget-overview">
+
+            <div>
+
+                <span>Monthly Budget</span>
+
+                <strong id="currentBudget">
+                    $0.00
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>Spent</span>
+
+                <strong id="budgetSpent">
+                    $0.00
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>Remaining</span>
+
+                <strong id="budgetRemaining">
+                    $0.00
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="progress-container large">
+
+            <div
+                id="budgetPageProgress"
+                class="progress-bar"
+            ></div>
+
+        </div>
+
+
+        <p id="budgetPageStatus" class="budget-status">
+            Set a budget to begin tracking your progress.
+        </p>
+
+    </section>
+
+
+    <div class="back-link">
+
+        <a href="index.html">← Back to Dashboard</a>
+
+    </div>
+
+</main>
+
+
+<footer>
+
+    <p>Student Budget Tracker &copy; 2026</p>
+
+</footer>
+
+
+<script src="app.js"></script>
+
+</body>
+</html>
