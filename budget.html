@@ -12,12 +12,17 @@
 
     <title>Monthly Budget</title>
 
+    <!-- Use the existing project stylesheet -->
     <link rel="stylesheet" href="style.css">
 
 </head>
 
 
 <body>
+
+<!-- ================================
+     HEADER
+================================= -->
 
 <header class="main-header">
 
@@ -38,13 +43,19 @@
 </header>
 
 
+<!-- ================================
+     NAVIGATION
+================================= -->
+
 <nav class="navigation">
 
     <div class="nav-container">
 
         <a href="index.html">Dashboard</a>
 
-        <a href="budget.html" class="active">Monthly Budget</a>
+        <a href="budget.html" class="active">
+            Monthly Budget
+        </a>
 
         <a href="analytics.html">Analytics</a>
 
@@ -53,7 +64,13 @@
 </nav>
 
 
+<!-- ================================
+     MAIN CONTENT
+================================= -->
+
 <main class="container">
+
+    <!-- PAGE INTRODUCTION -->
 
     <section class="welcome-section">
 
@@ -66,7 +83,9 @@
     </section>
 
 
-    <!-- SET BUDGET -->
+    <!-- ================================
+         SET BUDGET
+    ================================= -->
 
     <section class="content-card">
 
@@ -112,17 +131,28 @@
         </form>
 
 
+        <!-- Message shown after saving or if there is an error -->
+
         <p id="budgetMessage" class="message"></p>
 
     </section>
 
 
-    <!-- CURRENT BUDGET -->
+    <!-- ================================
+         CURRENT BUDGET
+    ================================= -->
 
     <section class="content-card">
 
         <h2>Current Budget</h2>
 
+        <p>
+            This section shows your monthly budget, how much you have
+            spent, and how much you have remaining.
+        </p>
+
+
+        <!-- Budget summary -->
 
         <div class="budget-overview">
 
@@ -131,7 +161,7 @@
                 <span>Monthly Budget</span>
 
                 <strong id="currentBudget">
-                    $0.00
+                    $1,000.00
                 </strong>
 
             </div>
@@ -142,7 +172,7 @@
                 <span>Spent</span>
 
                 <strong id="budgetSpent">
-                    $0.00
+                    $600.00
                 </strong>
 
             </div>
@@ -153,13 +183,24 @@
                 <span>Remaining</span>
 
                 <strong id="budgetRemaining">
-                    $0.00
+                    $400.00
                 </strong>
 
             </div>
 
         </div>
 
+
+        <!-- Example values for the project -->
+
+        <p>
+            <strong>Example:</strong>
+            If your monthly budget is $1,000 and you have spent $600,
+            you have $400 remaining.
+        </p>
+
+
+        <!-- Budget progress bar -->
 
         <div class="progress-container large">
 
@@ -171,6 +212,8 @@
         </div>
 
 
+        <!-- Budget status message -->
+
         <p id="budgetPageStatus" class="budget-status">
             Set a budget to begin tracking your progress.
         </p>
@@ -178,14 +221,45 @@
     </section>
 
 
+    <!-- ================================
+         HOW THE BUDGET WORKS
+    ================================= -->
+
+    <section class="content-card">
+
+        <h2>How Your Budget Works</h2>
+
+        <p>
+            Your monthly budget is compared with your recorded expenses.
+            This helps you see how much of your budget you have used
+            and how much money you have left.
+        </p>
+
+        <p>
+            The progress bar gives you a quick view of your budget usage.
+        </p>
+
+    </section>
+
+
+    <!-- ================================
+         BACK TO DASHBOARD
+    ================================= -->
+
     <div class="back-link">
 
-        <a href="index.html">← Back to Dashboard</a>
+        <a href="index.html">
+            ← Back to Dashboard
+        </a>
 
     </div>
 
 </main>
 
+
+<!-- ================================
+     FOOTER
+================================= -->
 
 <footer>
 
@@ -194,7 +268,10 @@
 </footer>
 
 
+<!-- Project JavaScript -->
+
 <script src="app.js"></script>
+
 
 </body>
 </html>
