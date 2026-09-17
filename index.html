@@ -106,6 +106,12 @@
 
     </section>
 
+  <!-- BUDGET TIP -->
+   <section class="dashboard-tip">
+        <strong>Budget Tip:</strong>
+        Review your transactions regularly to see where most of your money is being spent.
+    </section>
+
 
     <!-- ADD TRANSACTION -->
 
@@ -179,7 +185,7 @@
 
             <div class="form-group">
 
-                <label for="amount">Amount</label>
+                <label for="amount">Amount ($)</label>
 
                 <input
                     type="number"
@@ -243,6 +249,27 @@
                 </thead>
 
                 <tbody id="transactionList">
+        <!-- EXAMPLE -->  
+        <tr>
+        <td>Paycheck</td>
+        <td>Other</td>
+        <td>Income</td>
+        <td>+$500.00</td>
+    </tr>
+
+    <tr>
+        <td>Groceries</td>
+        <td>Food</td>
+        <td>Expense</td>
+        <td>-$65.50</td>
+    </tr>
+
+    <tr>
+        <td>Gas</td>
+        <td>Transportation</td>
+        <td>Expense</td>
+        <td>-$40.00</td>
+    </tr>
 
                 </tbody>
 
@@ -250,12 +277,28 @@
 
         </div>
 
+    </section>
 
-        <p id="emptyMessage" class="empty-message">
-            No transactions have been added yet.
+    <!-- DASHBOARD INFORMATION -->
+    <section class="content-card dashboard-info">
+
+        <h2>About the Dashboard</h2>
+
+        <p>
+            The Student Budget Tracker dashboard provides a simple way for students
+            to manage their finances. Users can record income and expenses, organize
+            transactions by category, and view their current balance and monthly budget.
+        </p>
+
+        <p>
+            Use the Monthly Budget page to set a spending goal and the Analytics page
+            to view a more detailed breakdown of your spending. Use Login page to sign 
+            in or create an account.
         </p>
 
     </section>
+
+
 
 </main>
 
