@@ -44,6 +44,7 @@ async function loadDashboard() {
         console.error("Error loading dashboard:", error);
 
     }
+
 }
 
 
@@ -88,7 +89,8 @@ if (transactionForm) {
             });
 
 
-            const data = await response.json();
+            const data =
+                await response.json();
 
 
             const message =
@@ -362,6 +364,8 @@ if (clearHistoryButton) {
 // BUDGET PAGE
 // ============================================
 
+
+// Load budget page
 const budgetForm =
     document.getElementById("budgetForm");
 
@@ -384,6 +388,9 @@ if (budgetForm) {
 
 
             try {
+
+                // Keep the existing Save Budget
+                // server functionality.
 
                 const response =
                     await fetch(
@@ -433,10 +440,14 @@ if (budgetForm) {
                     "message success";
 
 
+                // Keep the saved budget visible
+                // while using the simulated JSON
+                // for the current spending information.
+
+                loadBudgetPage(amount);
+
+
                 budgetForm.reset();
-
-
-                loadBudgetPage();
 
 
             } catch (error) {
@@ -457,44 +468,70 @@ if (budgetForm) {
 }
 
 
-// Load budget information
-async function loadBudgetPage() {
+// ============================================
+// HARD-CODED JSON / SERVER RESPONSE SIMULATION
+// ============================================
+
+async function loadBudgetData() {
+
+    const response =
+        await fetch("budget-data.json");
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Could not load budget-data.json"
+        );
+
+    }
+
+
+    return await response.json();
+
+}
+
+
+// ============================================
+// LOAD BUDGET INFORMATION
+// ============================================
+
+async function loadBudgetPage(savedBudget = null) {
 
     try {
 
-        const budgetResponse =
-            await fetch("/api/budgets");
+        // Read the hard-coded JSON file.
+        // This simulates receiving budget
+        // information from a server.
 
         const budgetData =
-            await budgetResponse.json();
+            await loadBudgetData();
 
 
-        const transactionResponse =
-            await fetch("/api/transactions");
-
-        const transactionData =
-            await transactionResponse.json();
-
-
-        const monthlyBudget =
+        let monthlyBudget =
             budgetData.budget.amount;
 
 
-        let expenses = 0;
+        const expenses =
+            budgetData.budget.spent;
 
 
-        transactionData.transactions.forEach(
-            function(transaction) {
+        // If the user just saved a new budget,
+        // use that value for the page display.
 
-                if (transaction.type === "expense") {
+        if (
+            savedBudget !== null &&
+            savedBudget > 0
+        ) {
 
-                    expenses += transaction.amount;
+            monthlyBudget =
+                savedBudget;
 
-                }
+        }
 
-            }
-        );
 
+        // Calculate remaining based on the
+        // budget amount and spending.
 
         const remaining =
             monthlyBudget - expenses;
@@ -505,10 +542,12 @@ async function loadBudgetPage() {
                 "currentBudget"
             );
 
+
         const budgetSpent =
             document.getElementById(
                 "budgetSpent"
             );
+
 
         const budgetRemaining =
             document.getElementById(
@@ -539,6 +578,8 @@ async function loadBudgetPage() {
 
         }
 
+
+        // Update the existing progress bar.
 
         updateBudgetProgress(
             monthlyBudget,
@@ -691,8 +732,10 @@ function displayCategories(
     categoryNames
         .sort(
             function(a, b) {
+
                 return categories[b] -
                     categories[a];
+
             }
         )
         .forEach(function(category) {
@@ -710,12 +753,14 @@ function displayCategories(
             const item =
                 document.createElement("div");
 
+
             item.className =
                 "category-item";
 
 
             const top =
                 document.createElement("div");
+
 
             top.className =
                 "category-top";
@@ -724,12 +769,14 @@ function displayCategories(
             const name =
                 document.createElement("strong");
 
+
             name.textContent =
                 category;
 
 
             const value =
                 document.createElement("span");
+
 
             value.textContent =
                 formatMoney(amount);
@@ -743,6 +790,7 @@ function displayCategories(
             const barBackground =
                 document.createElement("div");
 
+
             barBackground.className =
                 "category-bar-background";
 
@@ -750,8 +798,10 @@ function displayCategories(
             const bar =
                 document.createElement("div");
 
+
             bar.className =
                 "category-bar";
+
 
             bar.style.width =
                 percentage + "%";
@@ -762,6 +812,7 @@ function displayCategories(
 
             const percentageText =
                 document.createElement("small");
+
 
             percentageText.textContent =
                 percentage.toFixed(1) +
@@ -942,6 +993,7 @@ function updateBudgetProgress(
             formatMoney(spent - budget) +
             ".";
 
+
         status.className =
             "budget-status over-budget";
 
@@ -951,6 +1003,7 @@ function updateBudgetProgress(
             "You have " +
             formatMoney(budget - spent) +
             " remaining in your budget.";
+
 
         status.className =
             "budget-status";
