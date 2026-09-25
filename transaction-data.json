@@ -1,0 +1,26 @@
+{
+    "success": true,
+    "transactions": [
+        {
+            "id": 1,
+            "type": "income",
+            "description": "Part time Job",
+            "category": "Income",
+            "amount": 500.00
+        },
+        {
+            "id": 2,
+            "type": "expense",
+            "description": "Groceries",
+            "category": "Food",
+            "amount": 75.50
+        },
+        {
+            "id": 3,
+            "type": "expense",
+            "description": "Textbooks",
+            "category": "School",
+            "amount": 120.00
+        }
+    ]
+}

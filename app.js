@@ -11,18 +11,39 @@
 const transactionForm = document.getElementById("transactionForm");
 const transactionList = document.getElementById("transactionList");
 const clearHistoryButton = document.getElementById("clearHistory");
+const transactionFilter = document.getElementById("transactionFilter");
 
-
-// Load dashboard information
-async function loadDashboard() {
+// ============================================
+// CHANGED FOR DATABASE TESTING
+// ============================================
+async function loadDashboard(useServerData = false) {
 
     try {
 
-        const transactionResponse =
-            await fetch("/api/transactions");
+        let transactionData;
 
-        const transactionData =
-            await transactionResponse.json();
+
+        // On initial page load, use the hard-coded JSON.
+        // This simulates transaction data received
+        // from a server/database.
+
+        if (!useServerData) {
+
+            transactionData =
+                await loadTransactionData();
+
+        } else {
+
+            // After the user adds or clears a transaction,
+            // use the real server data.
+
+            const transactionResponse =
+                await fetch("/api/transactions");
+
+            transactionData =
+                await transactionResponse.json();
+
+        }
 
 
         const budgetResponse =
@@ -32,21 +53,27 @@ async function loadDashboard() {
             await budgetResponse.json();
 
 
-        displayTransactions(transactionData.transactions);
+        displayTransactions(
+            transactionData.transactions
+        );
+
 
         updateDashboardSummary(
             transactionData.transactions,
             budgetData.budget.amount
         );
 
+
     } catch (error) {
 
-        console.error("Error loading dashboard:", error);
+        console.error(
+            "Error loading dashboard:",
+            error
+        );
 
     }
 
 }
-
 
 // Add transaction
 if (transactionForm) {
@@ -117,7 +144,7 @@ if (transactionForm) {
             transactionForm.reset();
 
 
-            loadDashboard();
+            loadDashboard(true); // () -> changed to true
 
 
         } catch (error) {
@@ -162,10 +189,28 @@ function displayTransactions(transactions) {
     }
 
 
-    transactions
+    const selectedFilter =
+        transactionFilter
+        ? transactionFilter.value
+        : "all";
+
+
+    const filteredTransactions =
+        transactions.filter(function(transaction) {
+
+        if (selectedFilter === "all") {
+            return true;
+        }
+
+        return transaction.type === selectedFilter;
+
+    });
+
+
+        filteredTransactions
         .slice()
         .reverse()
-        .forEach(function(transaction) {
+         .forEach(function(transaction) {
 
             const row =
                 document.createElement("tr");
@@ -227,6 +272,19 @@ function displayTransactions(transactions) {
 
 }
 
+    // Filter transactions by type
+    if (transactionFilter) {
+
+    transactionFilter.addEventListener(
+        "change",
+        function() {
+
+            loadDashboard();
+
+        }
+    );
+
+}
 
 // Update dashboard summary
 function updateDashboardSummary(
@@ -340,7 +398,7 @@ if (clearHistoryButton) {
 
                 if (data.success) {
 
-                    loadDashboard();
+                    loadDashboard(true); // () -> true
 
                 }
 
@@ -359,6 +417,19 @@ if (clearHistoryButton) {
 
 }
 
+// ============================================
+// HARD-CODED TRANSACTION JSON (DATABASE SIMULATION)
+// ============================================
+
+async function loadTransactionData() {
+    const response = await fetch("transaction-data.json");
+
+    if (!response.ok) {
+        throw new Error("Could not load transaction-data.json");
+    }
+
+    return await response.json();
+}
 
 // ============================================
 // BUDGET PAGE

@@ -616,6 +616,29 @@ tbody tr:hover {
     color: #dc2626;
 }
 
+/* Transaction Filter */
+.transaction-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.transaction-filter label {
+    font-weight: 600;
+}
+
+.transaction-filter select {
+    padding: 9px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background-color: #2563eb;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+
 
 /* ============================================
    ANALYTICS
@@ -656,7 +679,7 @@ tbody tr:hover {
 
     height: 10px;
 
-    background-color: #e2e8f0;
+    background-color: #2563eb;
 
     border-radius: 20px;
 
