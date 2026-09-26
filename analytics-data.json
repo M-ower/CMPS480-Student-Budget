@@ -1,0 +1,16 @@
+{
+    "analytics": {
+        "income": 2500.00,
+        "expenses": 475.50,
+        "balance": 2024.50,
+        "monthlyBudget": 1200.00,
+        "remainingBudget": 724.50,
+        "categories": {
+            "Food": 150.00,
+            "Transportation": 100.00,
+            "Entertainment": 75.50,
+            "Shopping": 100.00,
+            "Other": 50.00
+        }
+    }
+}

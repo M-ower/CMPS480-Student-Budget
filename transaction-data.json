@@ -1,0 +1,75 @@
+{
+    "success": true,
+    "transactions": [
+        {
+            "id": 1,
+            "type": "income",
+            "description": "Part Time Job",
+            "category": "Income",
+            "amount": 650
+        },
+        {
+            "id": 2,
+            "type": "expense",
+            "description": "Groceries",
+            "category": "Food",
+            "amount": 82.45
+        },
+        {
+            "id": 3,
+            "type": "expense",
+            "description": "Gas",
+            "category": "Transportation",
+            "amount": 45
+        },
+        {
+            "id": 4,
+            "type": "expense",
+            "description": "Textbooks",
+            "category": "School",
+            "amount": 124.99
+        },
+        {
+            "id": 5,
+            "type": "income",
+            "description": "Extra Shift",
+            "category": "Income",
+            "amount": 200
+        },
+        {
+            "id": 6,
+            "type": "expense",
+            "description": "Phone Bill",
+            "category": "Bills",
+            "amount": 55.50
+        },
+        {
+            "id": 7,
+            "type": "expense",
+            "description": "Dinner",
+            "category": "Food",
+            "amount": 28.75
+        },
+        {
+            "id": 8,
+            "type": "expense",
+            "description": "Parking",
+            "category": "Transportation",
+            "amount": 15
+        },
+        {
+            "id": 9,
+            "type": "income",
+            "description": "Freelance Project",
+            "category": "Income",
+            "amount": 175.25
+        },
+        {
+            "id": 10,
+            "type": "expense",
+            "description": "Movie Tickets",
+            "category": "Entertainment",
+            "amount": 30
+        }
+    ]
+}

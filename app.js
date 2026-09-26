@@ -11,18 +11,39 @@
 const transactionForm = document.getElementById("transactionForm");
 const transactionList = document.getElementById("transactionList");
 const clearHistoryButton = document.getElementById("clearHistory");
+const transactionFilter = document.getElementById("transactionFilter");
 
-
-// Load dashboard information
-async function loadDashboard() {
+// ============================================
+// CHANGED FOR DATABASE TESTING
+// ============================================
+async function loadDashboard(useServerData = false) {
 
     try {
 
-        const transactionResponse =
-            await fetch("/api/transactions");
+        let transactionData;
 
-        const transactionData =
-            await transactionResponse.json();
+
+        // On initial page load, use the hard-coded JSON.
+        // This simulates transaction data received
+        // from a server/database.
+
+        if (!useServerData) {
+
+            transactionData =
+                await loadTransactionData();
+
+        } else {
+
+            // After the user adds or clears a transaction,
+            // use the real server data.
+
+            const transactionResponse =
+                await fetch("/api/transactions");
+
+            transactionData =
+                await transactionResponse.json();
+
+        }
 
 
         const budgetResponse =
@@ -32,20 +53,27 @@ async function loadDashboard() {
             await budgetResponse.json();
 
 
-        displayTransactions(transactionData.transactions);
+        displayTransactions(
+            transactionData.transactions
+        );
+
 
         updateDashboardSummary(
             transactionData.transactions,
             budgetData.budget.amount
         );
 
+
     } catch (error) {
 
-        console.error("Error loading dashboard:", error);
+        console.error(
+            "Error loading dashboard:",
+            error
+        );
 
     }
-}
 
+}
 
 // Add transaction
 if (transactionForm) {
@@ -88,7 +116,8 @@ if (transactionForm) {
             });
 
 
-            const data = await response.json();
+            const data =
+                await response.json();
 
 
             const message =
@@ -115,7 +144,7 @@ if (transactionForm) {
             transactionForm.reset();
 
 
-            loadDashboard();
+            loadDashboard(true); // () -> changed to true
 
 
         } catch (error) {
@@ -160,10 +189,28 @@ function displayTransactions(transactions) {
     }
 
 
-    transactions
+    const selectedFilter =
+        transactionFilter
+        ? transactionFilter.value
+        : "all";
+
+
+    const filteredTransactions =
+        transactions.filter(function(transaction) {
+
+        if (selectedFilter === "all") {
+            return true;
+        }
+
+        return transaction.type === selectedFilter;
+
+    });
+
+
+        filteredTransactions
         .slice()
         .reverse()
-        .forEach(function(transaction) {
+         .forEach(function(transaction) {
 
             const row =
                 document.createElement("tr");
@@ -225,6 +272,19 @@ function displayTransactions(transactions) {
 
 }
 
+    // Filter transactions by type
+    if (transactionFilter) {
+
+    transactionFilter.addEventListener(
+        "change",
+        function() {
+
+            loadDashboard();
+
+        }
+    );
+
+}
 
 // Update dashboard summary
 function updateDashboardSummary(
@@ -338,7 +398,7 @@ if (clearHistoryButton) {
 
                 if (data.success) {
 
-                    loadDashboard();
+                    loadDashboard(true); // () -> true
 
                 }
 
@@ -357,11 +417,26 @@ if (clearHistoryButton) {
 
 }
 
+// ============================================
+// HARD-CODED TRANSACTION JSON (DATABASE SIMULATION)
+// ============================================
+
+async function loadTransactionData() {
+    const response = await fetch("transaction-data.json");
+
+    if (!response.ok) {
+        throw new Error("Could not load transaction-data.json");
+    }
+
+    return await response.json();
+}
 
 // ============================================
 // BUDGET PAGE
 // ============================================
 
+
+// Load budget page
 const budgetForm =
     document.getElementById("budgetForm");
 
@@ -384,6 +459,9 @@ if (budgetForm) {
 
 
             try {
+
+                // Keep the existing Save Budget
+                // server functionality.
 
                 const response =
                     await fetch(
@@ -433,10 +511,14 @@ if (budgetForm) {
                     "message success";
 
 
+                // Keep the saved budget visible
+                // while using the simulated JSON
+                // for the current spending information.
+
+                loadBudgetPage(amount);
+
+
                 budgetForm.reset();
-
-
-                loadBudgetPage();
 
 
             } catch (error) {
@@ -457,44 +539,70 @@ if (budgetForm) {
 }
 
 
-// Load budget information
-async function loadBudgetPage() {
+// ============================================
+// HARD-CODED JSON / SERVER RESPONSE SIMULATION
+// ============================================
+
+async function loadBudgetData() {
+
+    const response =
+        await fetch("budget-data.json");
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Could not load budget-data.json"
+        );
+
+    }
+
+
+    return await response.json();
+
+}
+
+
+// ============================================
+// LOAD BUDGET INFORMATION
+// ============================================
+
+async function loadBudgetPage(savedBudget = null) {
 
     try {
 
-        const budgetResponse =
-            await fetch("/api/budgets");
+        // Read the hard-coded JSON file.
+        // This simulates receiving budget
+        // information from a server.
 
         const budgetData =
-            await budgetResponse.json();
+            await loadBudgetData();
 
 
-        const transactionResponse =
-            await fetch("/api/transactions");
-
-        const transactionData =
-            await transactionResponse.json();
-
-
-        const monthlyBudget =
+        let monthlyBudget =
             budgetData.budget.amount;
 
 
-        let expenses = 0;
+        const expenses =
+            budgetData.budget.spent;
 
 
-        transactionData.transactions.forEach(
-            function(transaction) {
+        // If the user just saved a new budget,
+        // use that value for the page display.
 
-                if (transaction.type === "expense") {
+        if (
+            savedBudget !== null &&
+            savedBudget > 0
+        ) {
 
-                    expenses += transaction.amount;
+            monthlyBudget =
+                savedBudget;
 
-                }
+        }
 
-            }
-        );
 
+        // Calculate remaining based on the
+        // budget amount and spending.
 
         const remaining =
             monthlyBudget - expenses;
@@ -505,10 +613,12 @@ async function loadBudgetPage() {
                 "currentBudget"
             );
 
+
         const budgetSpent =
             document.getElementById(
                 "budgetSpent"
             );
+
 
         const budgetRemaining =
             document.getElementById(
@@ -539,6 +649,8 @@ async function loadBudgetPage() {
 
         }
 
+
+        // Update the existing progress bar.
 
         updateBudgetProgress(
             monthlyBudget,
@@ -578,7 +690,7 @@ async function loadAnalytics() {
     try {
 
         const response =
-            await fetch("/api/analytics");
+        await fetch("analytics-data.json");
 
 
         const data =
@@ -691,8 +803,10 @@ function displayCategories(
     categoryNames
         .sort(
             function(a, b) {
+
                 return categories[b] -
                     categories[a];
+
             }
         )
         .forEach(function(category) {
@@ -710,12 +824,14 @@ function displayCategories(
             const item =
                 document.createElement("div");
 
+
             item.className =
                 "category-item";
 
 
             const top =
                 document.createElement("div");
+
 
             top.className =
                 "category-top";
@@ -724,12 +840,14 @@ function displayCategories(
             const name =
                 document.createElement("strong");
 
+
             name.textContent =
                 category;
 
 
             const value =
                 document.createElement("span");
+
 
             value.textContent =
                 formatMoney(amount);
@@ -743,6 +861,7 @@ function displayCategories(
             const barBackground =
                 document.createElement("div");
 
+
             barBackground.className =
                 "category-bar-background";
 
@@ -750,8 +869,10 @@ function displayCategories(
             const bar =
                 document.createElement("div");
 
+
             bar.className =
                 "category-bar";
+
 
             bar.style.width =
                 percentage + "%";
@@ -762,6 +883,7 @@ function displayCategories(
 
             const percentageText =
                 document.createElement("small");
+
 
             percentageText.textContent =
                 percentage.toFixed(1) +
@@ -818,26 +940,11 @@ if (loginForm) {
             try {
 
                 const response =
-                    await fetch(
-                        "/api/login",
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body: JSON.stringify({
-                                email: email,
-                                password: password
-                            })
-                        }
-                    );
-
+                     await fetch("login-data.json");
 
                 const data =
                     await response.json();
+
 
 
                 const message =
@@ -942,6 +1049,7 @@ function updateBudgetProgress(
             formatMoney(spent - budget) +
             ".";
 
+
         status.className =
             "budget-status over-budget";
 
@@ -951,6 +1059,7 @@ function updateBudgetProgress(
             "You have " +
             formatMoney(budget - spent) +
             " remaining in your budget.";
+
 
         status.className =
             "budget-status";

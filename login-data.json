@@ -1,0 +1,8 @@
+{
+    "success": true,
+    "message": "Login successful.",
+    "user": {
+        "id": 1,
+        "email": "student@example.com"
+    }
+}
