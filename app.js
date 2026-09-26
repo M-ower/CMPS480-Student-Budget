@@ -690,7 +690,7 @@ async function loadAnalytics() {
     try {
 
         const response =
-            await fetch("/api/analytics");
+        await fetch("analytics-data.json");
 
 
         const data =
