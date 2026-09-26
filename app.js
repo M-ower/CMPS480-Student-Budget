@@ -940,26 +940,11 @@ if (loginForm) {
             try {
 
                 const response =
-                    await fetch(
-                        "/api/login",
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body: JSON.stringify({
-                                email: email,
-                                password: password
-                            })
-                        }
-                    );
-
+                     await fetch("login-data.json");
 
                 const data =
                     await response.json();
+
 
 
                 const message =
