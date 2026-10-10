@@ -948,3 +948,91 @@ footer p {
     }
 
 }
+
+/* ============================================
+   PROFILE PAGE
+============================================ */
+
+.profile-full-width {
+    grid-column: 1 / -1;
+}
+
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    background-color: white;
+    font-family: inherit;
+    font-size: 15px;
+    resize: vertical;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+@media (max-width: 700px) {
+    .profile-full-width {
+        grid-column: 1;
+    }
+}
+/* ============================================
+   PROFILE PAGE IMPROVEMENTS
+============================================ */
+
+.profile-overview strong {
+    display: block;
+    font-size: 20px;
+    color: #1f2937;
+    overflow-wrap: anywhere;
+}
+
+/* Profile preview */
+
+.profile-preview {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.profile-avatar {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background-color: #dbeafe;
+    color: #2563eb;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.profile-preview-info h3 {
+    margin: 0 0 8px;
+    font-size: 20px;
+}
+
+.profile-preview-info p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 550px) {
+    .profile-preview {
+        align-items: flex-start;
+    }
+
+    .profile-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 22px;
+    }
+}

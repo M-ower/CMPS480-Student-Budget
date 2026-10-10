@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Student Budget Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <div>
+                <h1>Student Budget Tracker</h1>
+                <p>Manage your account and personal information.</p>
+            </div>
+            <a href="login.html" class="login-link">Login</a>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="navigation">
+        <div class="nav-container">
+            <a href="index.html">Dashboard</a>
+            <a href="budget.html">Budget</a>
+            <a href="analytics.html">Analytics</a>
+            <a href="goals.html">Goals</a>
+            <a href="profile.html" class="active">Profile</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+
+        <section class="welcome-section">
+            <h2>My Profile</h2>
+            <p>View and update your account information.</p>
+        </section>
+
+        <!-- Account Information -->
+        <section class="content-card">
+            <div class="section-title">
+                <h2>Account Information</h2>
+                <p>Your basic account details.</p>
+            </div>
+
+            <div class="budget-overview profile-overview">
+    <div>
+        <span>First Name</span>
+        <strong id="firstName">Not loaded</strong>
+    </div>
+
+    <div>
+        <span>Last Name</span>
+        <strong id="lastName">Not loaded</strong>
+    </div>
+
+    <div>
+        <span>Email Address</span>
+        <strong id="email">Not loaded</strong>
+    </div>
+</div>
+        </section>
+
+  <!-- Profile Preview -->
+<section class="content-card">
+    <div class="section-title">
+        <h2>Profile Preview</h2>
+        <p>How your profile will appear.</p>
+    </div>
+
+    <div class="profile-preview">
+        <div class="profile-avatar" id="profileAvatar">
+            <span id="profileInitials">?</span>
+        </div>
+
+        <div class="profile-preview-info">
+            <h3 id="previewName">Your Display Name</h3>
+            <p id="previewBio">
+                Your bio will appear here.
+            </p>
+        </div>
+    </div>
+</section>
+
+        <!-- Edit Profile -->
+        <section class="content-card">
+            <div class="section-title">
+                <h2>Edit Profile</h2>
+                <p>Customize your display name, image, and bio.</p>
+            </div>
+
+            <form id="profileForm" class="transaction-form">
+
+                <div class="form-group">
+                    <label for="display_name">Display Name</label>
+                    <input
+                        type="text"
+                        id="display_name"
+                        name="display_name"
+                        maxlength="100"
+                        placeholder="Enter your display name"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="profile_image">Profile Image URL</label>
+                    <input
+                        type="text"
+                        id="profile_image"
+                        name="profile_image"
+                        maxlength="255"
+                        placeholder="Enter an image URL"
+                    >
+                </div>
+
+                <div class="form-group profile-full-width">
+                    <label for="bio">Bio</label>
+                    <textarea
+                        id="bio"
+                        name="bio"
+                        rows="4"
+                        maxlength="255"
+                        placeholder="Tell us a little about yourself..."
+                    ></textarea>
+                </div>
+
+                <div class="profile-full-width">
+                    <button type="submit" class="primary-button">
+                        Save Profile
+                    </button>
+                </div>
+
+            </form>
+
+            <p id="profileMessage" class="message" role="status"></p>
+        </section>
+
+        <!-- Back to Dashboard -->
+        <div class="back-link">
+            <a href="index.html">← Back to Dashboard</a>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>Student Budget Tracker - CMPS480 Team Project</p>
+    </footer>
+
+    <script src="profile.js" defer></script>
+
+</body>
+</html>

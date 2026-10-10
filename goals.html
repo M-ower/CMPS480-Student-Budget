@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Savings Goals - Student Budget Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <div>
+                <h1>Student Budget Tracker</h1>
+                <p>Manage your money and reach your goals.</p>
+            </div>
+            <a href="login.html" class="login-link">Login</a>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="navigation">
+        <div class="nav-container">
+            <a href="index.html">Dashboard</a>
+            <a href="budget.html">Budget</a>
+            <a href="analytics.html">Analytics</a>
+            <a href="goals.html" class="active">Goals</a>
+            <a href="profile.html">Profile</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+
+        <section class="welcome-section">
+            <h2>Savings Goals</h2>
+            <p>Track your savings and progress toward your goals.</p>
+        </section>
+
+        <!-- Add Goal -->
+        <section class="content-card">
+            <div class="section-title">
+                <h2>Add Savings Goal</h2>
+                <p>Create a new goal and track how much you've saved.</p>
+            </div>
+
+            <form id="goalForm" class="transaction-form">
+
+                <div class="form-group">
+                    <label for="goal_name">Goal Name</label>
+                    <input
+                        type="text"
+                        id="goal_name"
+                        name="goal_name"
+                        placeholder="Example: New Laptop"
+                        maxlength="100"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="target_amount">Target Amount ($)</label>
+                    <input
+                        type="number"
+                        id="target_amount"
+                        name="target_amount"
+                        placeholder="1000.00"
+                        min="0.01"
+                        step="0.01"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="current_amount">Current Savings ($)</label>
+                    <input
+                        type="number"
+                        id="current_amount"
+                        name="current_amount"
+                        min="0"
+                        step="0.01"
+                        value="0"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="target_date">Target Date</label>
+                    <input
+                        type="date"
+                        id="target_date"
+                        name="target_date"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="primary-button">
+                        Add Goal
+                    </button>
+                </div>
+
+            </form>
+
+            <p id="goalMessage" class="message" role="status"></p>
+        </section>
+
+        <!-- Savings Goals List -->
+        <section class="content-card">
+            <div class="section-title">
+                <h2>My Savings Goals</h2>
+                <p>View your goals and track your progress.</p>
+            </div>
+
+            <div id="goalsList">
+                <p class="empty-message">
+                    No savings goals have been added yet.
+                </p>
+            </div>
+        </section>
+
+        <!-- Back Link -->
+        <div class="back-link">
+            <a href="index.html">← Back to Dashboard</a>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>Student Budget Tracker - CMPS480 Team Project</p>
+    </footer>
+
+    <script src="goals.js" defer></script>
+
+</body>
+</html>
