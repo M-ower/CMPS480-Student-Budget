@@ -16,7 +16,7 @@ const transactionFilter = document.getElementById("transactionFilter");
 // ============================================
 // CHANGED FOR DATABASE TESTING
 // ============================================
-async function loadDashboard(useServerData = false) {
+async function loadDashboard(useServerData = true) {
 
     try {
 
