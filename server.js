@@ -5,8 +5,19 @@ require("dotenv").config({
     )
 });
 
+const express = require("express");
+const db = require("./db");
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Allow Express to read JSON data
+app.use(express.json());
+
+// Serve the HTML, CSS, and JavaScript files
 app.use(express.static(__dirname));
-// Temp database connection test
+
+// Temporary database connection test
 app.get("/api/db-status", async (req, res) => {
     try {
         await db.query("SELECT 1");
@@ -25,24 +36,11 @@ app.get("/api/db-status", async (req, res) => {
     }
 });
 
-const express = require("express");
-const db = require("./db");
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Allow Express to read JSON data
-app.use(express.json());
-
-// Serve the HTML, CSS, and JavaScript files
-app.use(express.static(__dirname));
-
 // Temporary data for the project
 let transactions = [];
 let budget = {
     amount: 0
 };
-
 // ==============================
 // TRANSACTIONS
 // ==============================
