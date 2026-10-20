@@ -1,7 +1,35 @@
+require("dotenv").config({
+    path: require("path").join(
+        require("os").homedir(),
+        ".studentbudget-db.env"
+    )
+});
+
+app.use(express.static(__dirname));
+// Temp database connection test
+app.get("/api/db-status", async (req, res) => {
+    try {
+        await db.query("SELECT 1");
+
+        res.json({
+            success: true,
+            message: "MySQL database connected successfully."
+        });
+    } catch (error) {
+        console.error("Database connection error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Database connection failed."
+        });
+    }
+});
+
 const express = require("express");
+const db = require("./db");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Allow Express to read JSON data
 app.use(express.json());
