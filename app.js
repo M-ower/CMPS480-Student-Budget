@@ -88,8 +88,25 @@ function updateTransactionCategories() {
     }
 
     const categories = transactionTypeSelect.value === "income"
-        ? ["Salary"]
-        : ["Food", "Transportation", "Entertainment"];
+    ? [
+        "Salary",
+        "Part-Time Job",
+        "Freelance",
+        "Gifts",
+        "Scholarships",
+        "Other Income"
+    ]
+    : [
+        "Food",
+        "Transportation",
+        "Entertainment",
+        "Housing",
+        "School",
+        "Bills",
+        "Shopping",
+        "Healthcare",
+        "Other Expense"
+    ];
 
     transactionCategorySelect.innerHTML = "";
 
