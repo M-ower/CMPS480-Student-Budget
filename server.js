@@ -1,3 +1,4 @@
+
 require("dotenv").config({
     path: require("path").join(
         require("os").homedir(),
@@ -5,14 +6,18 @@ require("dotenv").config({
     )
 });
 
+const express = require("express");
+const db = require("./db");
 const bcrypt = require("bcryptjs");
 const session = require("express-session");
-const crypto = require("crypto");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Allow Express to read JSON data
+app.use(express.json());
 
+// Login sessions
 app.use(session({
     name: "studentbudget.sid",
     secret: process.env.SESSION_SECRET,
@@ -25,13 +30,6 @@ app.use(session({
         maxAge: 1000 * 60 * 60 * 2
     }
 }));
-
-const express = require("express");
-const db = require("./db");
-
-
-// Allow Express to read JSON data
-app.use(express.json());
 
 // Serve the HTML, CSS, and JavaScript files
 app.use(express.static(__dirname));
