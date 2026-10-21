@@ -58,61 +58,166 @@ let transactions = [];
 let budget = {
     amount: 0
 };
-// ==============================
-// TRANSACTIONS
-// ==============================
+ // ==============================
+ // TRANSACTIONS - MYSQL
+ // ==============================
 
-// Add a transaction
-app.post("/api/transactions", (req, res) => {
-    const { type, description, category, amount } = req.body;
+ // Add a transaction
+ app.post("/api/transactions", async (req, res) => {
+     const { type, description, category, amount } = req.body;
+     const userId = req.session.userId;
 
-    if (
-        !type ||
-        !description ||
-        !category ||
-        !amount ||
-        Number(amount) <= 0
-    ) {
-        return res.status(400).json({
-            success: false,
-            message: "Please provide valid transaction information."
-        });
-    }
+     if (!userId) {
+         return res.status(401).json({
+             success: false,
+             message: "Please log in first."
+         });
+     }
 
-    const transaction = {
-        id: Date.now(),
-        type: type,
-        description: description.trim(),
-        category: category,
-        amount: Number(amount)
-    };
+     if (
+         !["income", "expense"].includes(type) ||
+         typeof description !== "string" ||
+         !description.trim() ||
+         typeof category !== "string" ||
+         !category.trim() ||
+         !Number.isFinite(Number(amount)) ||
+         Number(amount) <= 0
+     ) {
+         return res.status(400).json({
+             success: false,
+             message: "Please provide valid transaction information."
+         });
+     }
 
-    transactions.push(transaction);
+     try {
+         const [categories] = await db.execute(
+             `SELECT category_id
+              FROM categories
+              WHERE name = ? AND LOWER(type) = ?
+              LIMIT 1`,
+             [category.trim(), type]
+         );
 
-    res.status(201).json({
-        success: true,
-        message: "Transaction added successfully.",
-        transaction: transaction
-    });
-});
+         if (categories.length === 0) {
+             return res.status(400).json({
+                 success: false,
+                 message: "Category not found in database."
+             });
+         }
 
-// Get all transactions
-app.get("/api/transactions", (req, res) => {
-    res.json({
-        success: true,
-        transactions: transactions
-    });
-});
+         const [result] = await db.execute(
+             `INSERT INTO transactions
+                 (user_id, type, description, category_id, amount, transaction_date)
+              VALUES (?, ?, ?, ?, ?, NOW())`,
+             [
+                 userId,
+                 type,
+                 description.trim(),
+                 categories[0].category_id,
+                 Number(amount)
+             ]
+         );
 
-// Delete all transactions
-app.delete("/api/transactions", (req, res) => {
-    transactions = [];
+         res.status(201).json({
+             success: true,
+             message: "Transaction saved to MySQL.",
+             transaction: {
+                 id: result.insertId,
+                 type,
+                 description: description.trim(),
+                 category: category.trim(),
+                 amount: Number(amount)
+             }
+         });
 
-    res.json({
-        success: true,
-        message: "Transaction history cleared."
-    });
-});
+     } catch (error) {
+         console.error("Transaction error:", error.message);
+
+         res.status(500).json({
+             success: false,
+             message: "Could not save transaction."
+         });
+     }
+ });
+
+ // Get transactions
+ app.get("/api/transactions", async (req, res) => {
+     const userId = req.session.userId;
+
+     if (!userId) {
+         return res.status(401).json({
+             success: false,
+             message: "Please log in first."
+         });
+     }
+
+     try {
+         const [rows] = await db.execute(
+             `SELECT
+                 t.transaction_id AS id,
+                 LOWER(t.type) AS type,
+                 t.description,
+                 c.name AS category,
+                 t.amount
+              FROM transactions t
+              JOIN categories c ON t.category_id = c.category_id
+              WHERE t.user_id = ?
+              ORDER BY t.transaction_id`,
+             [userId]
+         );
+
+         const transactions = rows.map(row => ({
+             ...row,
+             amount: Number(row.amount)
+         }));
+
+         res.json({
+             success: true,
+             transactions
+         });
+
+     } catch (error) {
+         console.error("Transaction error:", error.message);
+
+         res.status(500).json({
+             success: false,
+             message: "Could not load transactions."
+         });
+     }
+ });
+
+ // Clear transactions
+ app.delete("/api/transactions", async (req, res) => {
+     const userId = req.session.userId;
+
+     if (!userId) {
+         return res.status(401).json({
+             success: false,
+             message: "Please log in first."
+         });
+     }
+
+     try {
+         await db.execute(
+             "DELETE FROM transactions WHERE user_id = ?",
+             [userId]
+         );
+
+         res.json({
+             success: true,
+             message: "Transaction history cleared."
+         });
+
+     } catch (error) {
+         console.error("Transaction error:", error.message);
+
+         res.status(500).json({
+             success: false,
+             message: "Could not clear transactions."
+         });
+     }
+ });
+
 
 // ==============================
 // MONTHLY BUDGET
