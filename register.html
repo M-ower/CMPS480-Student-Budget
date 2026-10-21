@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Student Budget Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="login-page">
+
+<header class="main-header">
+    <div class="header-content">
+        <div>
+            <h1>Student Budget Tracker</h1>
+            <p>Manage your student budget in one place.</p>
+        </div>
+    </div>
+</header>
+
+<main class="login-container">
+    <section class="login-card">
+
+        <div class="login-title">
+            <div class="login-icon">$</div>
+            <h2>Create Account</h2>
+            <p>Register to start tracking your finances.</p>
+        </div>
+
+        <form id="registerForm">
+
+            <div class="form-group">
+                <label for="firstName">First Name</label>
+                <input type="text" id="firstName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="lastName">Last Name</label>
+                <input type="text" id="lastName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="registerEmail">Email</label>
+                <input type="email" id="registerEmail" required>
+            </div>
+
+            <div class="form-group">
+                <label for="registerPassword">Password</label>
+                <input
+                    type="password"
+                    id="registerPassword"
+                    minlength="12"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="primary-button">
+                Create Account
+            </button>
+
+        </form>
+
+        <p id="registerMessage" class="message"></p>
+
+        <div class="login-footer">
+            <p>Already have an account?</p>
+            <a href="login.html">Back to Login</a>
+        </div>
+
+    </section>
+</main>
+
+<footer>
+    <p>Student Budget Tracker &copy; 2026</p>
+</footer>
+
+<script src="app.js"></script>
+
+</body>
+</html>

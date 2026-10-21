@@ -1059,6 +1059,62 @@ const data = await response.json();
 }
 
 
+
+// ============================================
+// REGISTER NEW USER (Login page)
+// ============================================
+
+const registerForm = document.getElementById("registerForm");
+
+if (registerForm) {
+    registerForm.addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const firstName = document.getElementById("firstName").value.trim();
+        const lastName = document.getElementById("lastName").value.trim();
+        const email = document.getElementById("registerEmail").value.trim();
+        const password = document.getElementById("registerPassword").value;
+        const message = document.getElementById("registerMessage");
+
+        try {
+            const response = await fetch("/api/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    firstName,
+                    lastName,
+                    email,
+                    password
+                })
+            });
+
+            const data = await response.json();
+
+            message.textContent = data.message;
+            message.className = data.success
+                ? "message success"
+                : "message error";
+
+            if (data.success) {
+                registerForm.reset();
+
+                setTimeout(function() {
+                    window.location.href = "login.html";
+                }, 1500);
+            }
+
+        } catch (error) {
+            console.error("Registration error:", error);
+            message.textContent = "Could not create account.";
+            message.className = "message error";
+        }
+    });
+}
+
+
+
 // ============================================
 // BUDGET PROGRESS
 // ============================================

@@ -378,6 +378,86 @@ app.post("/api/login", async (req, res) => {
     }
 });
 
+
+// ==============================
+// REGISTER NEW USER (Login page)
+// ==============================
+
+app.post("/api/register", async (req, res) => {
+    const { firstName, lastName, email, password } = req.body;
+
+    if (
+        typeof firstName !== "string" ||
+        typeof lastName !== "string" ||
+        typeof email !== "string" ||
+        typeof password !== "string" ||
+        !firstName.trim() ||
+        !lastName.trim() ||
+        !email.trim() ||
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) ||
+        password.length < 12 ||
+        firstName.length > 100 ||
+        lastName.length > 100 ||
+        email.length > 254
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: "Enter valid details and a password of at least 12 characters."
+        });
+    }
+
+    try {
+        const normalizedEmail = email.trim().toLowerCase();
+
+        const [existing] = await db.execute(
+            "SELECT user_id FROM user WHERE email = ?",
+            [normalizedEmail]
+        );
+
+        if (existing.length > 0) {
+            return res.status(409).json({
+                success: false,
+                message: "An account with this email already exists."
+            });
+        }
+
+        const passwordHash = await bcrypt.hash(password, 12);
+
+        await db.execute(
+            `INSERT INTO user
+                (first_name, last_name, email, password_hash, created_at)
+             VALUES (?, ?, ?, ?, NOW())`,
+            [
+                firstName.trim(),
+                lastName.trim(),
+                normalizedEmail,
+                passwordHash
+            ]
+        );
+
+        res.status(201).json({
+            success: true,
+            message: "Account created successfully! Redirecting to login..."
+        });
+
+    } catch (error) {
+        if (error.code === "ER_DUP_ENTRY") {
+            return res.status(409).json({
+                success: false,
+                message: "An account with this email already exists."
+            });
+        }
+
+        console.error("Registration error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Could not create account."
+        });
+    }
+});
+
+
 // ==============================
 // START SERVER
 // ==============================
