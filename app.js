@@ -16,6 +16,9 @@ const transactionFilter = document.getElementById("transactionFilter");
 // ============================================
 // CHANGED FOR DATABASE TESTING
 // ============================================
+
+
+
 async function loadDashboard(useServerData = true) {
 
     try {
@@ -73,6 +76,42 @@ async function loadDashboard(useServerData = true) {
 
     }
 
+}
+
+// Automatically update categories based on transaction type
+const transactionTypeSelect = document.getElementById("type");
+const transactionCategorySelect = document.getElementById("category");
+
+function updateTransactionCategories() {
+    if (!transactionTypeSelect || !transactionCategorySelect) {
+        return;
+    }
+
+    const categories = transactionTypeSelect.value === "income"
+        ? ["Salary"]
+        : ["Food", "Transportation", "Entertainment"];
+
+    transactionCategorySelect.innerHTML = "";
+
+    categories.forEach(function(category) {
+        const option = document.createElement("option");
+        option.value = category;
+        option.textContent = category;
+        transactionCategorySelect.appendChild(option);
+    });
+}
+
+if (transactionTypeSelect && transactionCategorySelect) {
+    transactionTypeSelect.addEventListener("change", updateTransactionCategories);
+    updateTransactionCategories();
+}
+
+
+// Add transaction
+if (transactionForm) {
+    transactionForm.addEventListener("submit", async function(event) {
+// Keep your existing transaction code here
+    });
 }
 
 // Add transaction
@@ -142,7 +181,7 @@ if (transactionForm) {
 
 
             transactionForm.reset();
-
+            updateTransactionCategories();
 
             loadDashboard(true); // () -> changed to true
 
