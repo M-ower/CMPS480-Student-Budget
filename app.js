@@ -939,11 +939,19 @@ if (loginForm) {
 
             try {
 
-                const response =
-                     await fetch("login-data.json");
+                const response = await fetch("/api/login", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                            },
+                        credentials: "same-origin",
+                        body: JSON.stringify({
+                        email: email,
+                        password: password
+    })
+});
 
-                const data =
-                    await response.json();
+const data = await response.json();
 
 
 

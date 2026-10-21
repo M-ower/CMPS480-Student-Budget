@@ -5,11 +5,30 @@ require("dotenv").config({
     )
 });
 
-const express = require("express");
-const db = require("./db");
+const bcrypt = require("bcryptjs");
+const session = require("express-session");
+const crypto = require("crypto");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+
+app.use(session({
+    name: "studentbudget.sid",
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,
+        maxAge: 1000 * 60 * 60 * 2
+    }
+}));
+
+const express = require("express");
+const db = require("./db");
+
 
 // Allow Express to read JSON data
 app.use(express.json());
@@ -175,24 +194,85 @@ app.get("/api/analytics", (req, res) => {
 // LOGIN
 // ==============================
 
-app.post("/api/login", (req, res) => {
+app.post("/api/login", async (req, res) => {
     const { email, password } = req.body;
 
-    if (!email || !password) {
+    if (
+        typeof email !== "string" ||
+        typeof password !== "string" ||
+        !email.trim() ||
+        !password
+    ) {
         return res.status(400).json({
             success: false,
             message: "Email and password are required."
         });
     }
 
-    // Prototype login for the class project
-    res.json({
-        success: true,
-        message: "Login successful.",
-        user: {
-            email: email
+    try {
+        const [users] = await db.execute(
+            "SELECT user_id, email, password_hash FROM user WHERE email = ?",
+            [email.trim()]
+        );
+
+        if (users.length === 0) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid email or password."
+            });
         }
-    });
+
+        const user = users[0];
+
+        const passwordMatches = await bcrypt.compare(
+            password,
+            user.password_hash
+        );
+
+        if (!passwordMatches) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid email or password."
+            });
+        }
+
+        req.session.regenerate((error) => {
+            if (error) {
+                return res.status(500).json({
+                    success: false,
+                    message: "Could not create login session."
+                });
+            }
+
+            req.session.userId = user.user_id;
+
+            req.session.save((error) => {
+                if (error) {
+                    return res.status(500).json({
+                        success: false,
+                        message: "Could not save login session."
+                    });
+                }
+
+                res.json({
+                    success: true,
+                    message: "Login successful.",
+                    user: {
+                        id: user.user_id,
+                        email: user.email
+                    }
+                });
+            });
+        });
+
+    } catch (error) {
+        console.error("Login error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Login failed."
+        });
+    }
 });
 
 // ==============================
