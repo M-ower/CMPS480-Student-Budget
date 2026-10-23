@@ -457,6 +457,129 @@ app.post("/api/register", async (req, res) => {
     }
 });
 
+// ==============================
+// PROFILE - MYSQL
+// ==============================
+
+// Get logged-in user's profile
+app.get("/api/profile", async (req, res) => {
+    const userId = req.session.userId;
+
+    if (!userId) {
+        return res.status(401).json({
+            success: false,
+            message: "Please log in first."
+        });
+    }
+
+    try {
+        const [rows] = await db.execute(
+            `SELECT
+                u.first_name,
+                u.last_name,
+                u.email,
+                p.display_name,
+                p.profile_image,
+                p.bio
+             FROM user u
+             LEFT JOIN user_profiles p
+                ON u.user_id = p.user_id
+             WHERE u.user_id = ?`,
+            [userId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found."
+            });
+        }
+
+        res.json(rows[0]);
+
+    } catch (error) {
+        console.error("Profile error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Could not load profile."
+        });
+    }
+});
+// Save logged-in user's profile
+app.put("/api/profile", async (req, res) => {
+    const userId = req.session.userId;
+
+    if (!userId) {
+        return res.status(401).json({
+            success: false,
+            message: "Please log in first."
+        });
+    }
+
+    const { display_name, profile_image, bio } = req.body;
+
+    if (
+        typeof display_name !== "string" ||
+        typeof profile_image !== "string" ||
+        typeof bio !== "string" ||
+        display_name.length > 100 ||
+        profile_image.length > 255 ||
+        bio.length > 255
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid profile information."
+        });
+    }
+
+    try {
+        const [existing] = await db.execute(
+            "SELECT profile_id FROM user_profiles WHERE user_id = ?",
+            [userId]
+        );
+
+        if (existing.length > 0) {
+            await db.execute(
+                `UPDATE user_profiles
+                 SET display_name = ?, profile_image = ?, bio = ?
+                 WHERE user_id = ?`,
+                [
+                    display_name.trim(),
+                    profile_image.trim(),
+                    bio.trim(),
+                    userId
+                ]
+            );
+        } else {
+            await db.execute(
+                `INSERT INTO user_profiles
+                    (user_id, display_name, profile_image, bio)
+                 VALUES (?, ?, ?, ?)`,
+                [
+                    userId,
+                    display_name.trim(),
+                    profile_image.trim(),
+                    bio.trim()
+                ]
+            );
+        }
+
+        res.json({
+            success: true,
+            message: "Profile saved successfully."
+        });
+
+    } catch (error) {
+        console.error("Profile error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Could not save profile."
+        });
+    }
+});
+
 
 // ==============================
 // START SERVER
