@@ -223,32 +223,123 @@ let budget = {
 // MONTHLY BUDGET
 // ==============================
 
-// Save monthly budget
-app.post("/api/budgets", (req, res) => {
-    const { amount } = req.body;
+// Save or update the logged-in user's budget for the current month
+app.post("/api/budgets", async (req, res) => {
+    const userId = req.session.userId;
+    const amount = Number(req.body.amount);
 
-    if (!amount || Number(amount) <= 0) {
+    if (!userId) {
+        return res.status(401).json({
+            success: false,
+            message: "Please log in first."
+        });
+    }
+
+    if (!Number.isFinite(amount) || amount <= 0) {
         return res.status(400).json({
             success: false,
             message: "Please enter a valid budget amount."
         });
     }
 
-    budget.amount = Number(amount);
+    try {
+        const [existingBudgets] = await db.execute(
+            `SELECT budget_id
+             FROM budgets
+             WHERE user_id = ?
+               AND budget_month = DATE_FORMAT(CURDATE(), '%Y-%m-01')
+             LIMIT 1`,
+            [userId]
+        );
 
-    res.status(201).json({
-        success: true,
-        message: "Budget saved successfully.",
-        budget: budget
-    });
+        if (existingBudgets.length > 0) {
+            await db.execute(
+                `UPDATE budgets
+                 SET amount = ?
+                 WHERE budget_id = ? AND user_id = ?`,
+                [amount, existingBudgets[0].budget_id, userId]
+            );
+        } else {
+            await db.execute(
+                `INSERT INTO budgets (user_id, amount, budget_month)
+                 VALUES (?, ?, DATE_FORMAT(CURDATE(), '%Y-%m-01'))`,
+                [userId, amount]
+            );
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Monthly budget saved successfully.",
+            budget: { amount }
+        });
+    } catch (error) {
+        console.error("Save budget error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Could not save your budget."
+        });
+    }
 });
 
-// Get current budget
-app.get("/api/budgets", (req, res) => {
-    res.json({
-        success: true,
-        budget: budget
-    });
+// Get the logged-in user's budget and current-month spending
+app.get("/api/budgets", async (req, res) => {
+    const userId = req.session.userId;
+
+    if (!userId) {
+        return res.status(401).json({
+            success: false,
+            message: "Please log in first."
+        });
+    }
+
+    try {
+        const [budgetRows] = await db.execute(
+            `SELECT amount
+             FROM budgets
+             WHERE user_id = ?
+               AND budget_month = DATE_FORMAT(CURDATE(), '%Y-%m-01')
+             ORDER BY budget_id DESC
+             LIMIT 1`,
+            [userId]
+        );
+
+        const [spendingRows] = await db.execute(
+            `SELECT COALESCE(SUM(amount), 0) AS spent
+             FROM transactions
+             WHERE user_id = ?
+               AND LOWER(type) = 'expense'
+               AND transaction_date >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
+               AND transaction_date < DATE_ADD(
+                   DATE_FORMAT(CURDATE(), '%Y-%m-01'),
+                   INTERVAL 1 MONTH
+               )`,
+            [userId]
+        );
+
+        const amount = budgetRows.length > 0
+            ? Number(budgetRows[0].amount)
+            : 0;
+
+        const spent = Number(spendingRows[0].spent);
+        const remaining = amount - spent;
+
+        res.json({
+            success: true,
+            budget: {
+                amount,
+                spent,
+                remaining
+            }
+        });
+    } catch (error) {
+        console.error("Load budget error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Could not load your budget."
+        });
+    }
 });
 
 // ==============================

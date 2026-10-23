@@ -514,10 +514,30 @@ if (budgetForm) {
                 );
 
 
+            const message =
+                document.getElementById(
+                    "budgetMessage"
+                );
+
+
+            if (!Number.isFinite(amount) || amount < 0) {
+
+                if (message) {
+                    message.textContent =
+                        "Please enter a valid budget amount.";
+
+                    message.className =
+                        "message error";
+                }
+
+                return;
+            }
+
+
             try {
 
-                // Keep the existing Save Budget
-                // server functionality.
+                // Save the monthly budget to the database
+                // through the existing server API.
 
                 const response =
                     await fetch(
@@ -530,6 +550,8 @@ if (budgetForm) {
                                     "application/json"
                             },
 
+                            credentials: "same-origin",
+
                             body: JSON.stringify({
                                 amount: amount
                             })
@@ -541,37 +563,35 @@ if (budgetForm) {
                     await response.json();
 
 
-                const message =
-                    document.getElementById(
-                        "budgetMessage"
-                    );
+                if (!response.ok || !data.success) {
 
+                    if (message) {
+                        message.textContent =
+                            data.message ||
+                            "Could not save the monthly budget.";
 
-                if (!data.success) {
-
-                    message.textContent =
-                        data.message;
-
-                    message.className =
-                        "message error";
+                        message.className =
+                            "message error";
+                    }
 
                     return;
 
                 }
 
 
-                message.textContent =
-                    "Monthly budget saved successfully.";
+                if (message) {
+                    message.textContent =
+                        "Monthly budget saved successfully.";
 
-                message.className =
-                    "message success";
+                    message.className =
+                        "message success";
+                }
 
 
-                // Keep the saved budget visible
-                // while using the simulated JSON
-                // for the current spending information.
+                // Reload the budget from the server
+                // so the saved database value is displayed.
 
-                loadBudgetPage(amount);
+                await loadBudgetPage();
 
 
                 budgetForm.reset();
@@ -583,6 +603,14 @@ if (budgetForm) {
                     "Error saving budget:",
                     error
                 );
+
+                if (message) {
+                    message.textContent =
+                        "Could not save your budget. Please try again.";
+
+                    message.className =
+                        "message error";
+                }
 
             }
 
@@ -596,25 +624,41 @@ if (budgetForm) {
 
 
 // ============================================
-// HARD-CODED JSON / SERVER RESPONSE SIMULATION
+// LOAD BUDGET DATA FROM THE DATABASE API
 // ============================================
 
 async function loadBudgetData() {
 
     const response =
-        await fetch("budget-data.json");
+        await fetch("/api/budgets", {
+            credentials: "same-origin"
+        });
 
 
     if (!response.ok) {
 
         throw new Error(
-            "Could not load budget-data.json"
+            "Could not load monthly budget from the server."
         );
 
     }
 
 
-    return await response.json();
+    const data =
+        await response.json();
+
+
+    if (!data.success || !data.budget) {
+
+        throw new Error(
+            data.message ||
+            "Could not load monthly budget."
+        );
+
+    }
+
+
+    return data.budget;
 
 }
 
@@ -623,45 +667,32 @@ async function loadBudgetData() {
 // LOAD BUDGET INFORMATION
 // ============================================
 
-async function loadBudgetPage(savedBudget = null) {
+async function loadBudgetPage() {
 
     try {
 
-        // Read the hard-coded JSON file.
-        // This simulates receiving budget
-        // information from a server.
+        // Read the saved monthly budget and spending
+        // information from the server/database.
 
         const budgetData =
             await loadBudgetData();
 
 
-        let monthlyBudget =
-            budgetData.budget.amount;
+        const monthlyBudget =
+            Number(budgetData.amount) || 0;
 
 
         const expenses =
-            budgetData.budget.spent;
+            Number(budgetData.spent) || 0;
 
 
-        // If the user just saved a new budget,
-        // use that value for the page display.
-
-        if (
-            savedBudget !== null &&
-            savedBudget > 0
-        ) {
-
-            monthlyBudget =
-                savedBudget;
-
-        }
-
-
-        // Calculate remaining based on the
-        // budget amount and spending.
+        // Use the server's remaining amount when
+        // available; otherwise calculate it.
 
         const remaining =
-            monthlyBudget - expenses;
+            budgetData.remaining !== undefined
+                ? Number(budgetData.remaining)
+                : monthlyBudget - expenses;
 
 
         const currentBudget =
@@ -722,6 +753,23 @@ async function loadBudgetPage(savedBudget = null) {
             "Error loading budget:",
             error
         );
+
+
+        const message =
+            document.getElementById(
+                "budgetMessage"
+            );
+
+
+        if (message) {
+
+            message.textContent =
+                "Could not load your budget. Please log in and try again.";
+
+            message.className =
+                "message error";
+
+        }
 
     }
 
