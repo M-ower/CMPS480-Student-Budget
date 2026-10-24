@@ -343,6 +343,140 @@ app.get("/api/budgets", async (req, res) => {
 });
 
 // ==============================
+// SAVINGS GOALS - MYSQL
+// ==============================
+
+// Add a savings goal for the logged-in user
+app.post("/api/goals", async (req, res) => {
+    const userId = req.session.userId;
+
+    if (!userId) {
+        return res.status(401).json({
+            success: false,
+            message: "Please log in first."
+        });
+    }
+
+    const {
+        goal_name,
+        target_amount,
+        current_amount,
+        target_date
+    } = req.body;
+
+    const name = typeof goal_name === "string"
+        ? goal_name.trim()
+        : "";
+
+    const target = Number(target_amount);
+    const current = Number(current_amount);
+
+    if (
+        !name ||
+        name.length > 100 ||
+        target_amount === "" ||
+        !Number.isFinite(target) ||
+        target <= 0 ||
+        current_amount === "" ||
+        !Number.isFinite(current) ||
+        current < 0 ||
+        (target_date !== undefined &&
+            target_date !== null &&
+            target_date !== "" &&
+            (typeof target_date !== "string" ||
+             !/^\d{4}-\d{2}-\d{2}$/.test(target_date)))
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: "Please enter valid savings goal information."
+        });
+    }
+
+    try {
+        await db.execute(
+            `INSERT INTO savings_goals
+                (user_id, goal_name, target_amount, current_amount, target_date)
+             VALUES (?, ?, ?, ?, ?)`,
+            [
+                userId,
+                name,
+                target,
+                current,
+                target_date || null
+            ]
+        );
+
+        res.status(201).json({
+            success: true,
+            message: "Savings goal saved successfully."
+        });
+
+    } catch (error) {
+        console.error("Save goal error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Could not save your savings goal."
+        });
+    }
+});
+
+// Get savings goals belonging to the logged-in user
+app.get("/api/goals", async (req, res) => {
+    const userId = req.session.userId;
+
+    if (!userId) {
+        return res.status(401).json({
+            success: false,
+            message: "Please log in first."
+        });
+    }
+
+    try {
+        const [rows] = await db.execute(
+            `SELECT
+                goal_id,
+                goal_name,
+                target_amount,
+                current_amount,
+                target_date
+             FROM savings_goals
+             WHERE user_id = ?
+             ORDER BY goal_id DESC`,
+            [userId]
+        );
+
+        const goals = rows.map(goal => ({
+            ...goal,
+            target_amount: Number(goal.target_amount),
+            current_amount: Number(goal.current_amount),
+            target_date: goal.target_date
+                ? (
+                    goal.target_date instanceof Date
+                        ? goal.target_date.toISOString().slice(0, 10)
+                        : String(goal.target_date).slice(0, 10)
+                )
+                : null
+        }));
+
+        res.json({
+            success: true,
+            goals
+        });
+
+    } catch (error) {
+        console.error("Load goals error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Could not load savings goals."
+        });
+    }
+});
+
+
+
+// ==============================
 // ANALYTICS
 // ==============================
 
