@@ -480,42 +480,117 @@ app.get("/api/goals", async (req, res) => {
 // ANALYTICS
 // ==============================
 
-app.get("/api/analytics", (req, res) => {
-    let income = 0;
-    let expenses = 0;
+app.get("/api/analytics", async (req, res) => {
+    const userId = req.session.userId;
 
-    const categories = {};
+    // Only allow logged-in users to view their analytics
+    if (!userId) {
+        return res.status(401).json({
+            success: false,
+            message: "Please log in first."
+        });
+    }
 
-    transactions.forEach((transaction) => {
-        if (transaction.type === "income") {
-            income += transaction.amount;
-        }
+    try {
+        // Get total income and expenses for this user
+        const [summaryRows] = await db.execute(
+            `SELECT
+                COALESCE(SUM(
+                    CASE
+                        WHEN LOWER(type) = 'income' THEN amount
+                        ELSE 0
+                    END
+                ), 0) AS income,
+                COALESCE(SUM(
+                    CASE
+                        WHEN LOWER(type) = 'expense' THEN amount
+                        ELSE 0
+                    END
+                ), 0) AS expenses
+             FROM transactions
+             WHERE user_id = ?`,
+            [userId]
+        );
 
-        if (transaction.type === "expense") {
-            expenses += transaction.amount;
+        // Get expense totals grouped by category
+        const [categoryRows] = await db.execute(
+            `SELECT
+                c.name AS category,
+                SUM(t.amount) AS total
+             FROM transactions t
+             JOIN categories c
+                ON t.category_id = c.category_id
+             WHERE t.user_id = ?
+               AND LOWER(t.type) = 'expense'
+             GROUP BY c.category_id, c.name
+             ORDER BY total DESC`,
+            [userId]
+        );
 
-            if (!categories[transaction.category]) {
-                categories[transaction.category] = 0;
+        // Get this user's budget for the current month
+        const [budgetRows] = await db.execute(
+            `SELECT amount
+             FROM budgets
+             WHERE user_id = ?
+               AND budget_month =
+                   DATE_FORMAT(CURDATE(), '%Y-%m-01')
+             ORDER BY budget_id DESC
+             LIMIT 1`,
+            [userId]
+        );
+
+        // Calculate expenses for the current month only
+        const [monthlyExpenseRows] = await db.execute(
+            `SELECT COALESCE(SUM(amount), 0) AS spent
+             FROM transactions
+             WHERE user_id = ?
+               AND LOWER(type) = 'expense'
+               AND transaction_date >=
+                   DATE_FORMAT(CURDATE(), '%Y-%m-01')
+               AND transaction_date < DATE_ADD(
+                   DATE_FORMAT(CURDATE(), '%Y-%m-01'),
+                   INTERVAL 1 MONTH
+               )`,
+            [userId]
+        );
+
+        const income = Number(summaryRows[0].income);
+        const expenses = Number(summaryRows[0].expenses);
+        const balance = income - expenses;
+
+        const monthlyBudget = budgetRows.length > 0
+            ? Number(budgetRows[0].amount)
+            : 0;
+
+        const monthlyExpenses =
+            Number(monthlyExpenseRows[0].spent);
+
+        const categories = {};
+
+        categoryRows.forEach((row) => {
+            categories[row.category] = Number(row.total);
+        });
+
+        res.json({
+            success: true,
+            analytics: {
+                income,
+                expenses,
+                balance,
+                monthlyBudget,
+                remainingBudget: monthlyBudget - monthlyExpenses,
+                categories
             }
+        });
 
-            categories[transaction.category] += transaction.amount;
-        }
-    });
+    } catch (error) {
+        console.error("Analytics error:", error.message);
 
-    const balance = income - expenses;
-    const remainingBudget = budget.amount - expenses;
-
-    res.json({
-        success: true,
-        analytics: {
-            income: income,
-            expenses: expenses,
-            balance: balance,
-            monthlyBudget: budget.amount,
-            remainingBudget: remainingBudget,
-            categories: categories
-        }
-    });
+        res.status(500).json({
+            success: false,
+            message: "Could not load analytics."
+        });
+    }
 });
 
 // ==============================
