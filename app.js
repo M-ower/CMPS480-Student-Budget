@@ -779,83 +779,66 @@ async function loadBudgetPage() {
 // ============================================
 // ANALYTICS PAGE
 // ============================================
-
 async function loadAnalytics() {
-
-    const categoryList =
-        document.getElementById("categoryList");
-
+    const categoryList = document.getElementById("categoryList");
 
     if (!categoryList) {
         return;
     }
 
-
     try {
+        const response = await fetch("/api/analytics", {
+            credentials: "same-origin"
+        });
 
-        const response =
-        await fetch("analytics-data.json");
+        const data = await response.json();
 
+        if (!response.ok || !data.success || !data.analytics) {
+            throw new Error(
+                data.message || "Could not load analytics. Please log in."
+            );
+        }
 
-        const data =
-            await response.json();
+        const analytics = data.analytics;
 
-
-        const analytics =
-            data.analytics;
-
-
-        document.getElementById(
-            "analyticsIncome"
-        ).textContent =
+        document.getElementById("analyticsIncome").textContent =
             formatMoney(analytics.income);
 
-
-        document.getElementById(
-            "analyticsExpenses"
-        ).textContent =
+        document.getElementById("analyticsExpenses").textContent =
             formatMoney(analytics.expenses);
 
-
-        document.getElementById(
-            "analyticsBalance"
-        ).textContent =
+        document.getElementById("analyticsBalance").textContent =
             formatMoney(analytics.balance);
 
-
-        document.getElementById(
-            "remainingBudget"
-        ).textContent =
-            formatMoney(
-                analytics.remainingBudget
-            );
-
+        document.getElementById("remainingBudget").textContent =
+            formatMoney(analytics.remainingBudget);
 
         displayCategories(
-            analytics.categories,
-            analytics.expenses
+            analytics.categories || {},
+            Number(analytics.expenses) || 0
         );
 
-
         updateBudgetProgress(
-            analytics.monthlyBudget,
-            analytics.expenses,
+            Number(analytics.monthlyBudget) || 0,
+            Number(analytics.expenses) || 0,
             "budgetProgress",
             "budgetStatus"
         );
 
-
     } catch (error) {
+        console.error("Error loading analytics:", error);
 
-        console.error(
-            "Error loading analytics:",
-            error
+        const emptyMessage = document.getElementById(
+            "analyticsEmptyMessage"
         );
 
+        if (emptyMessage) {
+            emptyMessage.textContent =
+                error.message || "Could not load analytics.";
+            emptyMessage.style.display = "block";
+        }
     }
-
 }
-
 
 // Display category breakdown
 function displayCategories(
