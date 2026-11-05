@@ -125,23 +125,62 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? (amount / currentBalance) * 100
                 : 0;
 
-            if (projectedBalance < 0) {
+            
+            // Provide financial insights based on transaction impact
+            if (type === "expense" && projectedBalance < 0) {
 
                 adviceDisplay.textContent =
-                    "Warning: This transaction would put your balance " +
+                    "Warning: This expense exceeds your available balance by " +
                     formatMoney(Math.abs(projectedBalance)) +
-                    " below zero. Consider reducing or postponing this expense.";
+                    ". Consider reducing or postponing this purchase.";
 
                 adviceDisplay.style.color = "#dc2626";
                 projectedBalanceDisplay.style.color = "#dc2626";
+
+            } else if (type === "expense" && expensePercentage >= 90) {
+
+                adviceDisplay.textContent =
+                    "High Risk: This expense would use " +
+                    expensePercentage.toFixed(1) +
+                    "% of your balance, leaving only " +
+                    formatMoney(projectedBalance) +
+                    ". You may not have enough money remaining for essential expenses or unexpected costs.";
+
+                adviceDisplay.style.color = "#dc2626";
+                projectedBalanceDisplay.style.color = "#c2410c";
+
+            } else if (type === "expense" && expensePercentage >= 75) {
+
+                adviceDisplay.textContent =
+                    "Caution: This expense would use " +
+                    expensePercentage.toFixed(1) +
+                    "% of your balance, leaving " +
+                    formatMoney(projectedBalance) +
+                    ". Consider your upcoming bills and other financial responsibilities before confirming.";
+
+                adviceDisplay.style.color = "#c2410c";
+                projectedBalanceDisplay.style.color = "#c2410c";
+
+            } else if (type === "expense" && expensePercentage >= 25) {
+
+                adviceDisplay.textContent =
+                    "This is a significant expense, using " +
+                    expensePercentage.toFixed(1) +
+                    "% of your balance. You would have " +
+                    formatMoney(projectedBalance) +
+                    " remaining. Make sure this purchase fits your budget.";
+
+                adviceDisplay.style.color = "#475569";
+                projectedBalanceDisplay.style.color = "#2563eb";
 
             } else if (type === "expense") {
 
                 adviceDisplay.textContent =
                     "This expense would use " +
                     expensePercentage.toFixed(1) +
-                    "% of your current balance, leaving you with " +
-                    formatMoney(projectedBalance) + ".";
+                    "% of your balance, leaving " +
+                    formatMoney(projectedBalance) +
+                    ". Remember to account for your other expenses.";
 
                 adviceDisplay.style.color = "#475569";
                 projectedBalanceDisplay.style.color = "#2563eb";
@@ -152,12 +191,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     "This income would increase your balance by " +
                     formatMoney(amount) +
                     ", bringing your total to " +
-                    formatMoney(projectedBalance) + ".";
+                    formatMoney(projectedBalance) +
+                    ". Consider putting some of this income toward savings or upcoming expenses.";
 
                 adviceDisplay.style.color = "#15803d";
                 projectedBalanceDisplay.style.color = "#15803d";
+            }
 
-                    }
             
             // Update progress bar based on transaction size
             if (currentBalance > 0) {
