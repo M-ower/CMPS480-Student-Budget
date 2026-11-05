@@ -123,14 +123,6 @@ if (transactionTypeSelect && transactionCategorySelect) {
     updateTransactionCategories();
 }
 
-
-// Add transaction
-if (transactionForm) {
-    transactionForm.addEventListener("submit", async function(event) {
-// Keep your existing transaction code here
-    });
-}
-
 // Add transaction
 if (transactionForm) {
 
