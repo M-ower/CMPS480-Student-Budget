@@ -203,6 +203,110 @@
 
     </section>
 
+<!-- WHAT-IF FINANCIAL PLANNER -->
+
+<section class="content-card financial-planner">
+
+    <div class="planner-header">
+        <div>
+            <h2>What-If Financial Planner</h2>
+            <p>See how your next transaction could affect your balance.</p>
+        </div>
+
+        <button
+            type="button"
+            id="plannerToggle"
+            class="primary-button"
+            aria-expanded="false"
+            aria-controls="plannerContent"
+        >
+            Open Planner
+        </button>
+    </div>
+
+    <div id="plannerContent" hidden>
+
+        <p class="planner-intro">
+            Planning a purchase or expecting income?
+            Enter the details below to preview your financial situation.
+        </p>
+
+        <form id="plannerForm" class="transaction-form">
+
+            <div class="form-group">
+                <label for="plannerType">Transaction Type</label>
+                <select id="plannerType" required>
+                    <option value="expense">Expense</option>
+                    <option value="income">Income</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="plannerDescription">Description</label>
+                <input
+                    type="text"
+                    id="plannerDescription"
+                    placeholder="Example: New Laptop"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="plannerCategory">Category</label>
+                <select id="plannerCategory" required>
+                    <option value="">Select Category</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="plannerAmount">Amount ($)</label>
+                <input
+                    type="number"
+                    id="plannerAmount"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="0.00"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="primary-button">
+                Preview Transaction
+            </button>
+
+            <button type="button" id="plannerDiscard" class="planner-discard">
+                Discard
+            </button>
+
+        </form>
+
+        <div id="plannerResult" class="planner-result" hidden>
+            <h3>Financial Preview</h3>
+
+            <div class="planner-balance-row">
+                <span>Current Balance</span>
+                <strong id="plannerCurrentBalance">$0.00</strong>
+            </div>
+
+            <div class="planner-balance-row">
+                <span>Projected Balance</span>
+                <strong id="plannerProjectedBalance">$0.00</strong>
+            </div>
+
+            <p id="plannerAdvice"></p>
+
+            <button
+                type="button"
+                id="plannerConfirm"
+                class="primary-button"
+            >
+                Confirm Transaction
+            </button>
+        </div>
+
+    </div>
+
+</section>
 
     <!-- TRANSACTION HISTORY -->
 
@@ -309,6 +413,7 @@
 
 
 <script src="app.js"></script>
+<script src="financial-planner.js"></script>
 
 </body>
 

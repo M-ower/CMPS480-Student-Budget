@@ -1036,3 +1036,99 @@ textarea:focus {
         font-size: 22px;
     }
 }
+
+/* ============================================
+   WHAT-IF FINANCIAL PLANNER
+============================================ */
+
+.planner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.planner-header h2 {
+    margin: 0 0 5px;
+}
+
+.planner-header p {
+    margin: 0;
+    color: #64748b;
+}
+
+.planner-header .primary-button {
+    flex-shrink: 0;
+}
+
+#plannerContent {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+}
+
+#plannerContent[hidden],
+#plannerResult[hidden] {
+    display: none;
+}
+
+.planner-intro {
+    color: #475569;
+    margin-bottom: 20px;
+}
+
+.planner-discard {
+    background-color: #e2e8f0;
+    color: #334155;
+    border: none;
+    border-radius: 7px;
+    padding: 12px 20px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.planner-discard:hover {
+    background-color: #cbd5e1;
+}
+
+.planner-result {
+    margin-top: 25px;
+    padding: 20px;
+    background-color: #f8fafc;
+    border: 1px solid #dbeafe;
+    border-radius: 10px;
+}
+
+.planner-result h3 {
+    margin-top: 0;
+}
+
+.planner-balance-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 12px;
+}
+
+#plannerProjectedBalance {
+    color: #2563eb;
+    font-size: 20px;
+}
+
+#plannerAdvice {
+    margin: 15px 0;
+    color: #475569;
+    line-height: 1.5;
+}
+
+@media (max-width: 700px) {
+    .planner-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .planner-balance-row {
+        flex-wrap: wrap;
+    }
+}
