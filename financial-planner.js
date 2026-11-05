@@ -101,18 +101,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error("Invalid transaction data.");
             }
 
-            const currentBalance = data.transactions.reduce((balance, transaction) => {
-                const value = Number(transaction.amount) || 0;
+            // Calculate balance and round to 2 decimal places
+            const currentBalance = Math.round(
+                data.transactions.reduce((balance, transaction) => {
+                    const value = Number(transaction.amount) || 0;
 
-                return transaction.type === "income"
-                    ? balance + value
-                    : balance - value;
-            }, 0);
-
-            const projectedBalance = type === "income"
-                ? currentBalance + amount
-                : currentBalance - amount;
-
+                     return transaction.type === "income"
+                         ? balance + value
+                         : balance - value;
+                    }, 0) * 100  
+                ) / 100;
+                
+            // Calculate projected balance and round to 2 decimal places
+            const projectedBalance = Math.round(
+                (type === "income"
+                    ? currentBalance + amount
+                    : currentBalance - amount) * 100
+                    ) / 100;    
+            
             // Update the balance in Financial Preview
             currentBalanceDisplay.textContent = formatMoney(currentBalance);
             projectedBalanceDisplay.textContent = formatMoney(projectedBalance);
