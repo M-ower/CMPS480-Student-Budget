@@ -113,6 +113,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? currentBalance + amount
                 : currentBalance - amount;
 
+            // Update the balance in Financial Preview
+            currentBalanceDisplay.textContent = formatMoney(currentBalance);
+            projectedBalanceDisplay.textContent = formatMoney(projectedBalance);
+
             const progressBar = document.getElementById("plannerProgressBar");
             const progressText = document.getElementById("plannerProgressText");
 
@@ -158,30 +162,38 @@ document.addEventListener("DOMContentLoaded", () => {
             // Update progress bar
             if (type === "expense" && currentBalance > 0) {
 
-                const remainingPercentage = Math.max(
-                    0,
-                    Math.min(100, (projectedBalance / currentBalance) * 100)
-                );
+                const spentPercentage = (amount / currentBalance) * 100;
+                const displayPercentage = Math.min(spentPercentage, 100);
 
-                progressBar.style.width = remainingPercentage + "%";
+                progressBar.style.width = displayPercentage + "%";
 
                 progressBar.style.backgroundColor =
-                projectedBalance < 0 ? "#dc2626" : "#2563eb";
+                    projectedBalance < 0 ? "#dc2626" : "#2563eb";
 
                 progressText.textContent =
-                remainingPercentage.toFixed(1) +
-                "% of your current balance would remain.";
+                    spentPercentage.toFixed(1) +
+                    "% of your current balance would be used.";
+
+            } else if (type === "income" && currentBalance > 0) {
+
+                const increasePercentage = (amount / currentBalance) * 100;
+                const displayPercentage = Math.min(increasePercentage, 100);
+
+                progressBar.style.width = displayPercentage + "%";
+                progressBar.style.backgroundColor = "#15803d";
+
+                progressText.textContent =
+                    "This income would increase your current balance by " +
+                    increasePercentage.toFixed(1) + "%.";
 
             } else {
 
                 progressBar.style.width = "0%";
 
                 progressText.textContent =
-                    type === "income"
-                        ? "Your balance would increase with this income."
-                        : "No positive balance would remain after this expense.";
+                    "A percentage comparison is not available for this balance.";
 
-                    }
+            }
 
             preview = { type, description, category, amount };
             result.hidden = false;
