@@ -199,8 +199,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             
-            // Update progress bar based on transaction size
-            if (currentBalance > 0) {
+        // Update progress bar based on transaction size
+        if (currentBalance > 0) {
 
                 const percentage = (amount / currentBalance) * 100;
                 const displayPercentage = Math.min(percentage, 100);
@@ -256,15 +256,67 @@ document.addEventListener("DOMContentLoaded", () => {
                 progressBar.style.width = displayPercentage + "%";
                 progressBar.style.backgroundColor = barColor;
 
+            
+            
             } else {
 
-                // Avoid dividing by zero or a negative balance
-                progressBar.style.width = "0%";
-                progressBar.style.backgroundColor = "#94a3b8";
+                // Handle zero or negative current balances
+                if (type === "income") {
 
-                progressText.textContent =
-                    "A percentage comparison is not available for this balance.";
+                    if (currentBalance < 0) {
+
+                        const deficit = Math.abs(currentBalance);
+                        const recoveryPercentage = Math.min(
+                        (amount / deficit) * 100, 100
+                        );
+
+                        progressBar.style.width = recoveryPercentage + "%";
+                        progressBar.style.backgroundColor =
+                            projectedBalance >= 0 ? "#22c55e" : "#f97316";
+
+                        progressText.textContent =
+                        projectedBalance >= 0
+                            ? "This income would fully recover your negative balance."
+                            : recoveryPercentage.toFixed(1) +
+                            "% of your negative balance would be recovered.";
+
+                        adviceDisplay.textContent =
+                        projectedBalance >= 0
+                        ? "This income would cover your " +
+                        formatMoney(deficit) +
+                        " deficit and leave you with " +
+                        formatMoney(projectedBalance) + "."
+                        : "This income would reduce your deficit to " +
+                        formatMoney(Math.abs(projectedBalance)) +
+                        ". Continue adding income to recover your balance.";
+
+                        adviceDisplay.style.color =
+                        projectedBalance >= 0 ? "#15803d" : "#c2410c";
+
+                    } else {
+
+                        // Income when starting balance is zero
+                        progressBar.style.width = "100%";
+                        progressBar.style.backgroundColor = "#22c55e";
+
+                        progressText.textContent =
+                        "Your balance would increase from $0.00.";
+
+                    }
+
+            } else {
+
+            // Expense when balance is zero or negative
+            progressBar.style.width = "100%";
+            progressBar.style.backgroundColor = "#dc2626";
+
+            progressText.textContent =
+                currentBalance < 0
+                    ? "Warning: This expense would increase your deficit."
+                    : "Warning: This expense would put your balance below zero.";
             }
+        }
+
 
 
             preview = { type, description, category, amount };
