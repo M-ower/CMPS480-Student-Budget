@@ -87,8 +87,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 credentials: "same-origin"
             });
 
+            if (response.status === 401 || response.status === 403) {
+            throw new Error("Please log in to use the Financial Planner.");
+            }
+
             if (!response.ok) {
-                throw new Error("Could not retrieve transactions.");
+            throw new Error("Could not retrieve transactions.");
             }
 
             const data = await response.json();
@@ -109,34 +113,82 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? currentBalance + amount
                 : currentBalance - amount;
 
-            currentBalanceDisplay.textContent = formatMoney(currentBalance);
-            projectedBalanceDisplay.textContent = formatMoney(projectedBalance);
+            const progressBar = document.getElementById("plannerProgressBar");
+            const progressText = document.getElementById("plannerProgressText");
+
+            const expensePercentage =
+                currentBalance > 0
+                ? (amount / currentBalance) * 100
+                : 0;
 
             if (projectedBalance < 0) {
+
                 adviceDisplay.textContent =
-                    "Warning: This transaction would leave you with a negative balance.";
+                    "Warning: This transaction would put your balance " +
+                    formatMoney(Math.abs(projectedBalance)) +
+                    " below zero. Consider reducing or postponing this expense.";
+
                 adviceDisplay.style.color = "#dc2626";
                 projectedBalanceDisplay.style.color = "#dc2626";
+
             } else if (type === "expense") {
+
                 adviceDisplay.textContent =
-                    "This expense would leave you with " +
+                    "This expense would use " +
+                    expensePercentage.toFixed(1) +
+                    "% of your current balance, leaving you with " +
                     formatMoney(projectedBalance) + ".";
+
                 adviceDisplay.style.color = "#475569";
                 projectedBalanceDisplay.style.color = "#2563eb";
+
             } else {
+
                 adviceDisplay.textContent =
-                    "This income would increase your balance to " +
+                    "This income would increase your balance by " +
+                    formatMoney(amount) +
+                    ", bringing your total to " +
                     formatMoney(projectedBalance) + ".";
+
                 adviceDisplay.style.color = "#15803d";
                 projectedBalanceDisplay.style.color = "#15803d";
-            }
+
+                    }
+
+            // Update progress bar
+            if (type === "expense" && currentBalance > 0) {
+
+                const remainingPercentage = Math.max(
+                    0,
+                    Math.min(100, (projectedBalance / currentBalance) * 100)
+                );
+
+                progressBar.style.width = remainingPercentage + "%";
+
+                progressBar.style.backgroundColor =
+                projectedBalance < 0 ? "#dc2626" : "#2563eb";
+
+                progressText.textContent =
+                remainingPercentage.toFixed(1) +
+                "% of your current balance would remain.";
+
+            } else {
+
+                progressBar.style.width = "0%";
+
+                progressText.textContent =
+                    type === "income"
+                        ? "Your balance would increase with this income."
+                        : "No positive balance would remain after this expense.";
+
+                    }
 
             preview = { type, description, category, amount };
             result.hidden = false;
 
         } catch (error) {
             console.error("Planner preview error:", error);
-            alert("Could not calculate your preview. Please try again.");
+            alert(error.message || "Could not calculate your preview. Please try again.");
         }
     });
 
