@@ -158,42 +158,74 @@ document.addEventListener("DOMContentLoaded", () => {
                 projectedBalanceDisplay.style.color = "#15803d";
 
                     }
+            
+            // Update progress bar based on transaction size
+            if (currentBalance > 0) {
 
-            // Update progress bar
-            if (type === "expense" && currentBalance > 0) {
+                const percentage = (amount / currentBalance) * 100;
+                const displayPercentage = Math.min(percentage, 100);
 
-                const spentPercentage = (amount / currentBalance) * 100;
-                const displayPercentage = Math.min(spentPercentage, 100);
+                let barColor;
+                let level;
+
+                if (type === "expense") {
+
+                    if (percentage > 100) {
+                        barColor = "#dc2626";
+                        level = "Exceeds Balance";
+                    } else if (percentage > 75) {
+                        barColor = "#c2410c";
+                        level = "Large Expense";
+                    } else if (percentage > 25) {
+                        barColor = "#f97316";
+                        level = "Medium Expense";
+                    } else if (percentage > 10) {
+                        barColor = "#facc15";
+                        level = "Small Expense";
+                    } else {
+                        barColor = "#eab308";
+                        level = "Very Small Expense";
+                    }
+
+                    progressText.textContent =
+                        level + ": " +
+                        percentage.toFixed(1) +
+                        "% of your current balance would be used.";
+
+                } else {
+
+                    if (percentage > 100) {
+                        barColor = "#22c55e";
+                        level = "Huge Income";
+                    } else if (percentage > 50) {
+                        barColor = "#2dd4bf";
+                        level = "Large Income";
+                    } else if (percentage > 10) {
+                        barColor = "#2563eb";
+                        level = "Medium Income";
+                    } else {
+                        barColor = "#7dd3fc";
+                        level = "Small Income";
+                    }
+
+                    progressText.textContent =
+                        level + ": Your balance would increase by " +
+                        percentage.toFixed(1) + "%.";
+                }
 
                 progressBar.style.width = displayPercentage + "%";
-
-                progressBar.style.backgroundColor =
-                    projectedBalance < 0 ? "#dc2626" : "#2563eb";
-
-                progressText.textContent =
-                    spentPercentage.toFixed(1) +
-                    "% of your current balance would be used.";
-
-            } else if (type === "income" && currentBalance > 0) {
-
-                const increasePercentage = (amount / currentBalance) * 100;
-                const displayPercentage = Math.min(increasePercentage, 100);
-
-                progressBar.style.width = displayPercentage + "%";
-                progressBar.style.backgroundColor = "#15803d";
-
-                progressText.textContent =
-                    "This income would increase your current balance by " +
-                    increasePercentage.toFixed(1) + "%.";
+                progressBar.style.backgroundColor = barColor;
 
             } else {
 
+                // Avoid dividing by zero or a negative balance
                 progressBar.style.width = "0%";
+                progressBar.style.backgroundColor = "#94a3b8";
 
                 progressText.textContent =
                     "A percentage comparison is not available for this balance.";
-
             }
+
 
             preview = { type, description, category, amount };
             result.hidden = false;
