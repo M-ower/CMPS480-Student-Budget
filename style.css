@@ -1345,3 +1345,37 @@ textarea:focus {
         flex-wrap: wrap;
     }
 }
+
+/* Financial Insights Chart */
+.financial-chart {
+    margin-top: 25px;
+    margin-bottom: 25px;
+}
+
+.financial-chart p {
+    margin: 12px 0 6px;
+    font-weight: 600;
+}
+
+.chart-track {
+    width: 100%;
+    height: 20px;
+    background-color: #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.chart-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.income-bar {
+    background-color: #2563eb;
+}
+
+.expense-bar {
+    background-color: #f59e0b;
+}
