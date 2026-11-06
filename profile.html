@@ -166,57 +166,51 @@
     <p id="priorityMessage" class="message" role="status"></p>
 </section>
         
-            <!-- Financial Insights -->
-            <section class="content-card">
-                <div class="section-title">
-                    <h2>Financial Insights</h2>
-                    <p>View your financial summary and personalized advice.</p>
-                </div>
+<!-- Financial Insights -->
+<section class="content-card">
+    <div class="section-title">
+        <h2>Financial Insights</h2>
+        <p>A quick overview of your finances based on your recorded transactions.</p>
+    </div>
 
-                <div class="budget-overview">
-                <div>
-                    <span>Total Income</span>
-                    <strong id="insightIncome">$0.00</strong>
-                </div>
+    <!-- Income vs Expenses -->
+    <div class="financial-chart">
+        <h3>Income vs. Expenses</h3>
 
-                <div>
-                    <span>Total Expenses</span>
-                    <strong id="insightExpenses">$0.00</strong>
-                </div>
+        <div class="chart-label">
+            <span>Income</span>
+            <strong id="insightIncome">$0.00</strong>
+        </div>
+        <div class="chart-track">
+            <div id="incomeBar" class="chart-bar income-bar"></div>
+        </div>
 
-                <div>
-                    <span>Current Balance</span>
-                    <strong id="insightBalance">$0.00</strong>
-                </div>
-                </div>
+        <div class="chart-label">
+            <span>Expenses</span>
+            <strong id="insightExpenses">$0.00</strong>
+        </div>
+        <div class="chart-track">
+            <div id="expenseBar" class="chart-bar expense-bar"></div>
+        </div>
+    </div>
 
-                <div class="section-title">
-                    <h3>Income vs. Expenses</h3>
-                </div>
+    <!-- Remaining Balance -->
+    <div class="insight-balance">
+        <span>Remaining Balance</span>
+        <strong id="insightBalance">$0.00</strong>
+    </div>
 
-                <div class="financial-chart">
-                    <p>Income</p>
-                <div class="chart-track">
-                <div id="incomeBar" class="chart-bar income-bar"></div>
-                </div>
+    <!-- Personalized Message -->
+    <div class="insight-advice">
+        <h3>Your Financial Insight</h3>
+        <p id="personalizedInsight">
+            Loading your financial information...
+        </p>
+    </div>
 
-                <p>Expenses</p>
-                <div class="chart-track">
-                <div id="expenseBar" class="chart-bar expense-bar"></div>
-                </div>
-                </div>
-
-                <div class="section-title">
-                    <h3>Your Personalized Insight</h3>
-                    <p id="personalizedInsight">
-                    Loading your financial information...
-                    </p>
-                </div>
-
-                    <p id="insightMessage" class="message" role="status"></p>
-            </section>
-
-
+    <p id="insightMessage" class="message" role="status"></p>
+</section>
+  
         <!-- Back to Dashboard -->
         <div class="back-link">
             <a href="index.html">← Back to Dashboard</a>
