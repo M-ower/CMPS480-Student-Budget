@@ -1426,20 +1426,14 @@ textarea:focus {
 }
 
 /* Profile page buttons */
-.profile-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 20px;
-}
-
 #logoutButton {
     background-color: #dc2626;
     color: white;
     border: none;
     border-radius: 6px;
-    padding: 10px 18px;
+    padding: 10px 16px;
     cursor: pointer;
+    margin-left: 10px;
 }
 
 #logoutButton:hover {
