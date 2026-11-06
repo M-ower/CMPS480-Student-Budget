@@ -678,6 +678,29 @@ app.post("/api/login", async (req, res) => {
     }
 });
 
+// ==============================
+// LOGOUT
+// ==============================
+
+app.post("/api/logout", (req, res) => {
+    req.session.destroy((error) => {
+        if (error) {
+            return res.status(500).json({
+                success: false,
+                message: "Could not log out."
+            });
+        }
+
+        res.clearCookie("studentbudget.sid", {
+            path: "/"
+        });
+
+        res.json({
+            success: true,
+            message: "Logged out successfully."
+        });
+    });
+});
 
 // ==============================
 // REGISTER NEW USER (Login page)

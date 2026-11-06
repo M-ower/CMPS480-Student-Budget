@@ -318,4 +318,25 @@ priorityForm.addEventListener("submit", async function(event) {
         await loadFinancialInsights();
 }
 
+// Logout button
+const logoutButton = document.getElementById("logoutButton");
+
+logoutButton.addEventListener("click", async () => {
+    try {
+        const response = await fetch("/api/logout", {
+            method: "POST"
+        });
+
+        if (!response.ok) {
+            throw new Error("Logout failed");
+        }
+
+        window.location.href = "login.html";
+
+    } catch (error) {
+        console.error("Logout error:", error);
+        alert("Unable to log out. Please try again.");
+    }
+});
+
     initializeProfile();
