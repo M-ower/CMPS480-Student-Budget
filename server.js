@@ -882,6 +882,56 @@ app.put("/api/profile", async (req, res) => {
 });
 
 
+ // Save the logged-in user's financial preference
+app.put("/api/profile/priority", async (req, res) => {
+    const userId = req.session.userId;
+    const { financial_priority } = req.body;
+
+    if (!userId) {
+        return res.status(401).json({
+            success: false,
+            message: "Please log in first."
+        });
+    }
+
+    const allowedPriorities = [
+        "balanced",
+        "save_more",
+        "reduce_spending"
+    ];
+
+    if (!allowedPriorities.includes(financial_priority)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid financial priority."
+        });
+    }
+
+    try {
+        await db.execute(
+            `UPDATE user
+             SET financial_priority = ?
+             WHERE user_id = ?`,
+            [financial_priority, userId]
+        );
+
+        res.json({
+            success: true,
+            message: "Financial preference saved successfully.",
+            financial_priority
+        });
+
+    } catch (error) {
+        console.error("Financial preference error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Could not save financial preference."
+        });
+    }
+});
+
+
 // ==============================
 // START SERVER
 // ==============================

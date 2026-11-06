@@ -58,8 +58,9 @@ async function loadProfile() {
         displayNameInput.value = profile.display_name || "";
         profileImageInput.value = profile.profile_image || "";
         bioInput.value = profile.bio || "";
+        
         // Load saved financial priority
-prioritySelect.value = profile.financial_priority || "balanced";
+        prioritySelect.value = profile.financial_priority || "balanced";
 
 
         updateProfilePreview();
