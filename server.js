@@ -778,6 +778,7 @@ app.get("/api/profile", async (req, res) => {
                 u.first_name,
                 u.last_name,
                 u.email,
+                u.financial_priority,
                 p.display_name,
                 p.profile_image,
                 p.bio

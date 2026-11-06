@@ -138,7 +138,33 @@
 
             <p id="profileMessage" class="message" role="status"></p>
         </section>
+<!-- Financial Preferences -->
+<section class="content-card">
+    <div class="section-title">
+        <h2>Financial Preferences</h2>
+        <p>Choose what you want to focus on financially.</p>
+    </div>
 
+    <form id="priorityForm" class="transaction-form">
+        <div class="form-group">
+            <label for="financialPriority">Financial Priority</label>
+
+            <select id="financialPriority" name="financial_priority">
+                <option value="balanced">Maintain Balance</option>
+                <option value="save_more">Save More Money</option>
+                <option value="reduce_spending">Reduce Spending</option>
+            </select>
+        </div>
+
+        <div class="profile-full-width">
+            <button type="submit" class="primary-button">
+                Save Preference
+            </button>
+        </div>
+    </form>
+
+    <p id="priorityMessage" class="message" role="status"></p>
+</section>
         <!-- Back to Dashboard -->
         <div class="back-link">
             <a href="index.html">← Back to Dashboard</a>
