@@ -832,158 +832,166 @@ async function loadAnalytics() {
     }
 }
 
-// Display category breakdown
-function displayCategories(
-    categories,
-    totalExpenses
-) {
 
-    const categoryList =
-        document.getElementById(
-            "categoryList"
-        );
+// Display category breakdown, highest-spending category, and pie chart
+function displayCategories(categories, totalExpenses) {
+    const categoryList = document.getElementById("categoryList");
+    const emptyMessage = document.getElementById("analyticsEmptyMessage");
+    const highestCategoryDisplay = document.getElementById("highestSpendingCategory");
+    const pieChart = document.getElementById("categoryPieChart");
+    const pieLegend = document.getElementById("categoryPieLegend");
 
-
-    const emptyMessage =
-        document.getElementById(
-            "analyticsEmptyMessage"
-        );
-
+    if (!categoryList) {
+        return;
+    }
 
     categoryList.innerHTML = "";
 
+    if (pieLegend) {
+        pieLegend.innerHTML = "";
+    }
 
-    const categoryNames =
-        Object.keys(categories);
+    const sortedCategories = Object.entries(categories)
+        .map(function(entry) {
+            return [entry[0], Number(entry[1]) || 0];
+        })
+        .filter(function(entry) {
+            return entry[1] > 0;
+        })
+        .sort(function(a, b) {
+            return b[1] - a[1];
+        });
 
-
-    if (categoryNames.length === 0) {
-
+    if (sortedCategories.length === 0) {
         if (emptyMessage) {
+            emptyMessage.textContent = "Add some expenses to see your spending breakdown.";
+            emptyMessage.style.display = "block";
+        }
 
-            emptyMessage.style.display =
-                "block";
+        if (highestCategoryDisplay) {
+            highestCategoryDisplay.textContent = "No expenses yet";
+        }
 
+        if (pieChart) {
+            pieChart.style.background = "#e2e8f0";
         }
 
         return;
-
     }
-
 
     if (emptyMessage) {
-
-        emptyMessage.style.display =
-            "none";
-
+        emptyMessage.style.display = "none";
     }
 
+    // Display the highest-spending category
+    const highestCategory = sortedCategories[0];
 
-    categoryNames
-        .sort(
-            function(a, b) {
+    if (highestCategoryDisplay) {
+        highestCategoryDisplay.textContent =
+            highestCategory[0] + " — " + formatMoney(highestCategory[1]);
+    }
 
-                return categories[b] -
-                    categories[a];
+    // Colors used for the pie chart and category bars
+    const chartColors = [
+        "#2563eb",
+        "#16a34a",
+        "#f59e0b",
+        "#9333ea",
+        "#ef4444",
+        "#0891b2",
+        "#db2777",
+        "#64748b",
+        "#84cc16"
+    ];
 
-            }
-        )
-        .forEach(function(category) {
+    let currentAngle = 0;
+    const gradientParts = [];
 
-            const amount =
-                categories[category];
+    sortedCategories.forEach(function(entry, index) {
+        const category = entry[0];
+        const amount = entry[1];
 
+        const percentage = totalExpenses > 0
+            ? (amount / totalExpenses) * 100
+            : 0;
 
-            const percentage =
-                totalExpenses > 0
-                    ? (amount / totalExpenses) * 100
-                    : 0;
+        const color = chartColors[index % chartColors.length];
 
+        // Create the pie chart section
+        const nextAngle = currentAngle + percentage * 3.6;
 
-            const item =
-                document.createElement("div");
+        gradientParts.push(
+            color + " " + currentAngle + "deg " + nextAngle + "deg"
+        );
 
+        currentAngle = nextAngle;
 
-            item.className =
-                "category-item";
+        // Create category breakdown item
+        const item = document.createElement("div");
+        item.className = "category-item";
 
+        const top = document.createElement("div");
+        top.className = "category-top";
 
-            const top =
-                document.createElement("div");
+        const name = document.createElement("strong");
+        name.textContent = category;
 
+        const value = document.createElement("span");
+        value.textContent = formatMoney(amount);
 
-            top.className =
-                "category-top";
+        top.appendChild(name);
+        top.appendChild(value);
 
+        // Create percentage bar
+        const barBackground = document.createElement("div");
+        barBackground.className = "category-bar-background";
 
-            const name =
-                document.createElement("strong");
+        const bar = document.createElement("div");
+        bar.className = "category-bar";
+        bar.style.width = Math.min(percentage, 100) + "%";
+        bar.style.backgroundColor = color;
 
+        barBackground.appendChild(bar);
 
-            name.textContent =
-                category;
+        const percentageText = document.createElement("small");
+        percentageText.textContent = percentage.toFixed(1) + "% of expenses";
 
+        item.appendChild(top);
+        item.appendChild(barBackground);
+        item.appendChild(percentageText);
 
-            const value =
-                document.createElement("span");
+        categoryList.appendChild(item);
 
+        // Create pie chart legend
+        if (pieLegend) {
+            const legendItem = document.createElement("div");
+            legendItem.className = "pie-legend-item";
 
-            value.textContent =
-                formatMoney(amount);
+            const colorDot = document.createElement("span");
+            colorDot.className = "pie-legend-color";
+            colorDot.style.backgroundColor = color;
 
+            const legendText = document.createElement("span");
+            legendText.textContent =
+                category + " (" + percentage.toFixed(1) + "%)";
 
-            top.appendChild(name);
+            legendItem.appendChild(colorDot);
+            legendItem.appendChild(legendText);
 
-            top.appendChild(value);
+            pieLegend.appendChild(legendItem);
+        }
+    });
 
+    // Display the completed pie chart
+    if (pieChart) {
+        pieChart.style.background =
+            "conic-gradient(" + gradientParts.join(", ") + ")";
 
-            const barBackground =
-                document.createElement("div");
-
-
-            barBackground.className =
-                "category-bar-background";
-
-
-            const bar =
-                document.createElement("div");
-
-
-            bar.className =
-                "category-bar";
-
-
-            bar.style.width =
-                percentage + "%";
-
-
-            barBackground.appendChild(bar);
-
-
-            const percentageText =
-                document.createElement("small");
-
-
-            percentageText.textContent =
-                percentage.toFixed(1) +
-                "% of expenses";
-
-
-            item.appendChild(top);
-
-            item.appendChild(
-                barBackground
-            );
-
-            item.appendChild(
-                percentageText
-            );
-
-
-            categoryList.appendChild(item);
-
-        });
-
+        pieChart.setAttribute(
+            "aria-label",
+            "Pie chart showing expenses by category"
+        );
+    }
 }
 
 

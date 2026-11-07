@@ -20,7 +20,7 @@ app.use(express.json());
 // Login sessions
 app.use(session({
     name: "studentbudget.sid",
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || "studentbudget-local-dev-secret-2026",
     resave: false,
     saveUninitialized: false,
     cookie: {
