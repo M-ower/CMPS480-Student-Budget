@@ -610,7 +610,14 @@ tbody tr:hover {
 
     font-weight: bold;
 }
+/* Warning when spending exceeds the budget */
+.budget-status.over-budget {
+    color: #dc2626;
+}
 
+.progress-bar.over-budget {
+    background-color: #dc2626;
+}
 
 .over-budget {
     color: #dc2626;

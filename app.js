@@ -837,7 +837,14 @@ async function loadAnalytics() {
 function displayCategories(categories, totalExpenses) {
     const categoryList = document.getElementById("categoryList");
     const emptyMessage = document.getElementById("analyticsEmptyMessage");
-    const highestCategoryDisplay = document.getElementById("highestSpendingCategory");
+
+    const highestCategoryName =
+        document.getElementById("highestCategoryName");
+    const highestCategoryAmount =
+        document.getElementById("highestCategoryAmount");
+    const highestCategoryPercentage =
+        document.getElementById("highestCategoryPercentage");
+
     const pieChart = document.getElementById("categoryPieChart");
     const pieLegend = document.getElementById("categoryPieLegend");
 
@@ -851,25 +858,61 @@ function displayCategories(categories, totalExpenses) {
         pieLegend.innerHTML = "";
     }
 
-    const sortedCategories = Object.entries(categories)
+    // Combine duplicate category names
+    const combinedCategories = {};
+
+    Object.entries(categories || {}).forEach(function(entry) {
+        const category = String(entry[0]).trim();
+        const amount = Number(entry[1]) || 0;
+        const key = category.toLowerCase();
+
+        if (category && amount > 0) {
+            if (combinedCategories[key]) {
+                combinedCategories[key].amount += amount;
+            } else {
+                combinedCategories[key] = {
+                    name: category,
+                    amount: amount
+                };
+            }
+        }
+    });
+
+    // Sort categories from highest spending to lowest
+    const sortedCategories = Object.values(combinedCategories)
         .map(function(entry) {
-            return [entry[0], Number(entry[1]) || 0];
-        })
-        .filter(function(entry) {
-            return entry[1] > 0;
+            return [entry.name, entry.amount];
         })
         .sort(function(a, b) {
             return b[1] - a[1];
         });
 
+    // Calculate total spending across all categories
+    const categoryTotal = sortedCategories.reduce(
+        function(total, entry) {
+            return total + entry[1];
+        },
+        0
+    );
+
+    // Handle empty expenses
     if (sortedCategories.length === 0) {
         if (emptyMessage) {
-            emptyMessage.textContent = "Add some expenses to see your spending breakdown.";
+            emptyMessage.textContent =
+                "Add some expenses to see your spending breakdown.";
             emptyMessage.style.display = "block";
         }
 
-        if (highestCategoryDisplay) {
-            highestCategoryDisplay.textContent = "No expenses yet";
+        if (highestCategoryName) {
+            highestCategoryName.textContent = "No expenses yet";
+        }
+
+        if (highestCategoryAmount) {
+            highestCategoryAmount.textContent = "--";
+        }
+
+        if (highestCategoryPercentage) {
+            highestCategoryPercentage.textContent = "--";
         }
 
         if (pieChart) {
@@ -883,15 +926,28 @@ function displayCategories(categories, totalExpenses) {
         emptyMessage.style.display = "none";
     }
 
-    // Display the highest-spending category
+    // Display highest-spending category
     const highestCategory = sortedCategories[0];
 
-    if (highestCategoryDisplay) {
-        highestCategoryDisplay.textContent =
-            highestCategory[0] + " — " + formatMoney(highestCategory[1]);
+    const highestPercentage = categoryTotal > 0
+        ? (highestCategory[1] / categoryTotal) * 100
+        : 0;
+
+    if (highestCategoryName) {
+        highestCategoryName.textContent = highestCategory[0];
     }
 
-    // Colors used for the pie chart and category bars
+    if (highestCategoryAmount) {
+        highestCategoryAmount.textContent =
+            formatMoney(highestCategory[1]);
+    }
+
+    if (highestCategoryPercentage) {
+        highestCategoryPercentage.textContent =
+            highestPercentage.toFixed(1) + "%";
+    }
+
+    // Colors for pie chart and category bars
     const chartColors = [
         "#2563eb",
         "#16a34a",
@@ -911,13 +967,13 @@ function displayCategories(categories, totalExpenses) {
         const category = entry[0];
         const amount = entry[1];
 
-        const percentage = totalExpenses > 0
-            ? (amount / totalExpenses) * 100
+        const percentage = categoryTotal > 0
+            ? (amount / categoryTotal) * 100
             : 0;
 
         const color = chartColors[index % chartColors.length];
 
-        // Create the pie chart section
+        // Create pie chart section
         const nextAngle = currentAngle + percentage * 3.6;
 
         gradientParts.push(
@@ -948,13 +1004,14 @@ function displayCategories(categories, totalExpenses) {
 
         const bar = document.createElement("div");
         bar.className = "category-bar";
-        bar.style.width = Math.min(percentage, 100) + "%";
+        bar.style.width = percentage + "%";
         bar.style.backgroundColor = color;
 
         barBackground.appendChild(bar);
 
         const percentageText = document.createElement("small");
-        percentageText.textContent = percentage.toFixed(1) + "% of expenses";
+        percentageText.textContent =
+            percentage.toFixed(1) + "% of expenses";
 
         item.appendChild(top);
         item.appendChild(barBackground);
@@ -982,7 +1039,7 @@ function displayCategories(categories, totalExpenses) {
         }
     });
 
-    // Display the completed pie chart
+    // Display pie chart
     if (pieChart) {
         pieChart.style.background =
             "conic-gradient(" + gradientParts.join(", ") + ")";
@@ -1156,67 +1213,49 @@ function updateBudgetProgress(
     progressId,
     statusId
 ) {
-
-    const progress =
-        document.getElementById(progressId);
-
-    const status =
-        document.getElementById(statusId);
-
+    const progress = document.getElementById(progressId);
+    const status = document.getElementById(statusId);
 
     if (!progress || !status) {
         return;
     }
 
-
+    // Reset progress and status when no budget is set
     if (budget <= 0) {
-
         progress.style.width = "0%";
+        progress.classList.remove("over-budget");
 
         status.textContent =
             "Set a monthly budget to begin tracking your spending.";
 
+        status.className = "budget-status";
         return;
-
     }
 
+    const percentage = (spent / budget) * 100;
+    const displayPercentage = Math.min(percentage, 100);
 
-    const percentage =
-        (spent / budget) * 100;
-
-
-    const displayPercentage =
-        Math.min(percentage, 100);
-
-
-    progress.style.width =
-        displayPercentage + "%";
-
+    progress.style.width = displayPercentage + "%";
 
     if (spent > budget) {
+        progress.classList.add("over-budget");
 
         status.textContent =
             "You are over your monthly budget by " +
             formatMoney(spent - budget) +
             ".";
 
-
-        status.className =
-            "budget-status over-budget";
-
+        status.className = "budget-status over-budget";
     } else {
+        progress.classList.remove("over-budget");
 
         status.textContent =
             "You have " +
             formatMoney(budget - spent) +
             " remaining in your budget.";
 
-
-        status.className =
-            "budget-status";
-
+        status.className = "budget-status";
     }
-
 }
 
 
