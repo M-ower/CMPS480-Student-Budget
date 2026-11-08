@@ -680,30 +680,19 @@ tbody tr:hover {
     font-weight: bold;
 }
 
-
 .category-bar-background {
     width: 100%;
-
     height: 10px;
-
-    background-color: #2563eb;
-
+    background-color: #e2e8f0;
     border-radius: 20px;
-
     overflow: hidden;
 }
 
-
 .category-bar {
     height: 100%;
-
-    background-color: #2563eb;
-
     border-radius: 20px;
-
     transition: width 0.4s ease;
 }
-
 
 .category-item small {
     display: block;
@@ -1448,24 +1437,47 @@ textarea:focus {
 
 /* Highest Spending Category */
 .highest-category-card {
-    background: #f1f5f9;
-    padding: 18px;
-    border-radius: 10px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 22px;
     margin: 20px 0;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
 }
 
 .highest-category-card h3 {
-    margin: 0 0 8px;
-    font-size: 16px;
+    margin: 0 0 18px;
+    font-size: 18px;
+    color: #1e293b;
 }
 
-.highest-category-card p {
-    margin: 0;
-    font-size: 22px;
-    font-weight: bold;
+.highest-category-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.highest-category-details div {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.highest-category-details span {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.highest-category-details strong {
     color: #2563eb;
+    font-size: 20px;
 }
 
+@media (max-width: 550px) {
+    .highest-category-details {
+        grid-template-columns: 1fr;
+    }
+}
 /* Pie Chart Layout */
 .analytics-visuals {
     display: flex;
