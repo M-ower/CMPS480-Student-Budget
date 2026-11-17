@@ -238,37 +238,57 @@ app.get("/api/transactions", async (req, res) => {
     }
 });
 
- // Clear transactions
- app.delete("/api/transactions", async (req, res) => {
-     const userId = req.session.userId;
+ // Clear transactions for the selected month
+app.delete("/api/transactions", async (req, res) => {
+    const userId = req.session.userId;
 
-     if (!userId) {
-         return res.status(401).json({
-             success: false,
-             message: "Please log in first."
-         });
-     }
+    if (!userId) {
+        return res.status(401).json({
+            success: false,
+            message: "Please log in first."
+        });
+    }
 
-     try {
-         await db.execute(
-             "DELETE FROM transactions WHERE user_id = ?",
-             [userId]
-         );
+    // Require a selected month
+    const month = req.query.month;
 
-         res.json({
-             success: true,
-             message: "Transaction history cleared."
-         });
+    // Validate YYYY-MM format
+    if (
+        typeof month !== "string" ||
+        !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: "Please provide a valid month in YYYY-MM format."
+        });
+    }
 
-     } catch (error) {
-         console.error("Transaction error:", error.message);
+    const startDate = `${month}-01`;
 
-         res.status(500).json({
-             success: false,
-             message: "Could not clear transactions."
-         });
-     }
- });
+    try {
+        const [result] = await db.execute(
+            `DELETE FROM transactions
+             WHERE user_id = ?
+               AND transaction_date >= ?
+               AND transaction_date < DATE_ADD(?, INTERVAL 1 MONTH)`,
+            [userId, startDate, startDate]
+        );
+
+        res.json({
+            success: true,
+            message: `Transactions cleared for ${month}.`,
+            deletedCount: result.affectedRows
+        });
+
+    } catch (error) {
+        console.error("Transaction error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Could not clear transactions."
+        });
+    }
+});
 
 
 // ==============================
