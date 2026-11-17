@@ -140,51 +140,73 @@ let budget = {
      }
  });
 
- // Get transactions
- app.get("/api/transactions", async (req, res) => {
-     const userId = req.session.userId;
+// Get transactions for the a selected month
+app.get("/api/transactions", async (req, res) => {
+    const userId = req.session.userId;
 
-     if (!userId) {
-         return res.status(401).json({
-             success: false,
-             message: "Please log in first."
-         });
-     }
+    if (!userId) {
+        return res.status(401).json({
+            success: false,
+            message: "Please log in first."
+        });
+    }
 
-     try {
-         const [rows] = await db.execute(
-             `SELECT
-                 t.transaction_id AS id,
-                 LOWER(t.type) AS type,
-                 t.description,
-                 c.name AS category,
-                 t.amount
-              FROM transactions t
-              JOIN categories c ON t.category_id = c.category_id
-              WHERE t.user_id = ?
-              ORDER BY t.transaction_id`,
-             [userId]
-         );
+    // Default to the current month if none is selected
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const month = req.query.month || currentMonth;
 
-         const transactions = rows.map(row => ({
-             ...row,
-             amount: Number(row.amount)
-         }));
+    // Validate YYYY-MM format
+    if (
+        typeof month !== "string" ||
+        !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid month. Use YYYY-MM format."
+        });
+    }
 
-         res.json({
-             success: true,
-             transactions
-         });
+    const startDate = `${month}-01`;
 
-     } catch (error) {
-         console.error("Transaction error:", error.message);
+    try {
+        const [rows] = await db.execute(
+            `SELECT
+                t.transaction_id AS id,
+                LOWER(t.type) AS type,
+                t.description,
+                c.name AS category,
+                t.amount,
+                DATE_FORMAT(t.transaction_date, '%Y-%m-%d') AS date
+             FROM transactions t
+             JOIN categories c
+                ON t.category_id = c.category_id
+             WHERE t.user_id = ?
+               AND t.transaction_date >= ?
+               AND t.transaction_date < DATE_ADD(?, INTERVAL 1 MONTH)
+             ORDER BY t.transaction_date DESC, t.transaction_id DESC`,
+            [userId, startDate, startDate]
+        );
 
-         res.status(500).json({
-             success: false,
-             message: "Could not load transactions."
-         });
-     }
- });
+        const transactions = rows.map(row => ({
+            ...row,
+            amount: Number(row.amount)
+        }));
+
+        res.json({
+            success: true,
+            month,
+            transactions
+        });
+
+    } catch (error) {
+        console.error("Transaction error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Could not load transactions."
+        });
+    }
+});
 
  // Clear transactions
  app.delete("/api/transactions", async (req, res) => {
