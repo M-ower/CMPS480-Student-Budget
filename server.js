@@ -63,82 +63,112 @@ let budget = {
  // ==============================
 
  // Add a transaction
- app.post("/api/transactions", async (req, res) => {
-     const { type, description, category, amount } = req.body;
-     const userId = req.session.userId;
+app.post("/api/transactions", async (req, res) => {
+    const { type, description, category, amount, date } = req.body;
+    const userId = req.session.userId;
 
-     if (!userId) {
-         return res.status(401).json({
-             success: false,
-             message: "Please log in first."
-         });
-     }
+    if (!userId) {
+        return res.status(401).json({
+            success: false,
+            message: "Please log in first."
+        });
+    }
 
-     if (
-         !["income", "expense"].includes(type) ||
-         typeof description !== "string" ||
-         !description.trim() ||
-         typeof category !== "string" ||
-         !category.trim() ||
-         !Number.isFinite(Number(amount)) ||
-         Number(amount) <= 0
-     ) {
-         return res.status(400).json({
-             success: false,
-             message: "Please provide valid transaction information."
-         });
-     }
+    // Validate transaction information
+    if (
+        !["income", "expense"].includes(type) ||
+        typeof description !== "string" ||
+        !description.trim() ||
+        typeof category !== "string" ||
+        !category.trim() ||
+        amount === null ||
+        amount === undefined ||
+        amount === "" ||
+        !Number.isFinite(Number(amount)) ||
+        Number(amount) <= 0
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: "Please provide valid transaction information."
+        });
+    }
 
-     try {
-         const [categories] = await db.execute(
-             `SELECT category_id
-              FROM categories
-              WHERE name = ? AND LOWER(type) = ?
-              LIMIT 1`,
-             [category.trim(), type]
-         );
+    // Use today's date if the user does not provide one
+    const today = new Date();
+    const defaultDate =
+        `${today.getFullYear()}-` +
+        `${String(today.getMonth() + 1).padStart(2, "0")}-` +
+        `${String(today.getDate()).padStart(2, "0")}`;
 
-         if (categories.length === 0) {
-             return res.status(400).json({
-                 success: false,
-                 message: "Category not found in database."
-             });
-         }
+    const transactionDate = date === undefined ? defaultDate : date;
 
-         const [result] = await db.execute(
-             `INSERT INTO transactions
-                 (user_id, type, description, category_id, amount, transaction_date)
-              VALUES (?, ?, ?, ?, ?, NOW())`,
-             [
-                 userId,
-                 type,
-                 description.trim(),
-                 categories[0].category_id,
-                 Number(amount)
-             ]
-         );
+    // Validate the transaction date
+    if (
+        typeof transactionDate !== "string" ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(transactionDate) ||
+        Number.isNaN(Date.parse(transactionDate)) ||
+        new Date(transactionDate).toISOString().slice(0, 10) !== transactionDate
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: "Please provide a valid date in YYYY-MM-DD format."
+        });
+    }
 
-         res.status(201).json({
-             success: true,
-             message: "Transaction saved to MySQL.",
-             transaction: {
-                 id: result.insertId,
-                 type,
-                 description: description.trim(),
-                 category: category.trim(),
-                 amount: Number(amount)
-             }
-         });
+    try {
+        // Find the selected category
+        const [categories] = await db.execute(
+            `SELECT category_id
+             FROM categories
+             WHERE name = ? AND LOWER(type) = ?
+             LIMIT 1`,
+            [category.trim(), type]
+        );
 
-     } catch (error) {
-         console.error("Transaction error:", error.message);
+        if (categories.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Category not found in database."
+            });
+        }
 
-         res.status(500).json({
-             success: false,
-             message: "Could not save transaction."
-         });
-     }
- });
+        // Save transaction using the selected date
+        const [result] = await db.execute(
+            `INSERT INTO transactions
+                (user_id, type, description, category_id, amount, transaction_date)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [
+                userId,
+                type,
+                description.trim(),
+                categories[0].category_id,
+                Number(amount),
+                `${transactionDate} 12:00:00`
+            ]
+        );
+
+        res.status(201).json({
+            success: true,
+            message: "Transaction saved to MySQL.",
+            transaction: {
+                id: result.insertId,
+                type,
+                description: description.trim(),
+                category: category.trim(),
+                amount: Number(amount),
+                date: transactionDate
+            }
+        });
+
+    } catch (error) {
+        console.error("Transaction error:", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Could not save transaction."
+        });
+    }
+});
 
 // Get transactions for the a selected month
 app.get("/api/transactions", async (req, res) => {
