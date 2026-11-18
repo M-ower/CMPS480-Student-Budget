@@ -37,15 +37,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return dateInput.value.slice(0, 7);
     }
 
-    function setPlannerDateFromMonth() {
-        const month = document.getElementById("monthSelector")?.value;
-
-        if (month && /^\d{4}-\d{2}$/.test(month)) {
-            dateInput.value = `${month}-01`;
-        }   
-    }
-            setPlannerDateFromMonth();
-
     // Use the same categories as the existing transaction form
     const categories = {
         income: [
@@ -77,11 +68,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Any changes invalidate the previous preview
     [descriptionInput, amountInput, categorySelect, dateInput].forEach(input => {
-        input.addEventListener("input", () => {
+    ["input", "change"].forEach(eventName => {
+        input.addEventListener(eventName, () => {
             result.hidden = true;
             preview = null;
-        }); 
+        });
     });
+});
 
     let preview = null;
 
@@ -396,7 +389,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        confirmButton.disabled = true;
+        
 
         if (
             !preview ||
@@ -407,6 +400,8 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Please select a valid planner date within 2026.");
             return;
             }
+
+                confirmButton.disabled = true;
 
         try {
             const response = await fetch("/api/transactions", {
@@ -427,6 +422,7 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Transaction added successfully!");
 
             form.reset();
+            setDefaultPlannerDate();
             updateCategories();
             result.hidden = true;
             preview = null;
@@ -449,6 +445,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Discard the planned transaction
     discardButton.addEventListener("click", () => {
         form.reset();
+        setDefaultPlannerDate();
         updateCategories();
         result.hidden = true;
         preview = null;

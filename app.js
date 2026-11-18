@@ -63,6 +63,7 @@ function setupMonthSelector() {
 
     monthSelector.addEventListener("change", function() {
         setDefaultTransactionDate();
+        setDefaultPlannerDate();
         loadDashboard();
     });
 }
@@ -70,7 +71,7 @@ function setupMonthSelector() {
 
 // Default transaction date to today
 
-function setDefaultTransactionDate() {
+function setDefaultTransactionDate() {  
     if (!transactionDateInput) return;
 
     const today = new Date();
@@ -90,6 +91,26 @@ function setDefaultTransactionDate() {
     }
 }
 
+function setDefaultPlannerDate() {
+    const plannerDateInput = document.getElementById("plannerDate");
+
+    if (!plannerDateInput || !monthSelector) return;
+
+    const selectedMonth = monthSelector.value;
+    const currentMonth = getCurrentMonth();
+    const today = new Date();
+
+    if (selectedMonth === currentMonth) {
+        plannerDateInput.value =
+            selectedMonth + "-" +
+            String(today.getDate()).padStart(2, "0");
+    } else {
+        plannerDateInput.value = selectedMonth + "-01";
+    }
+
+    // Notify the planner that its date changed
+    plannerDateInput.dispatchEvent(new Event("change", { bubbles: true }));
+}
 
 async function loadDashboard() {
     try {
@@ -1345,6 +1366,7 @@ function formatMoney(amount) {
 if (transactionForm) {
     setupMonthSelector();
     setDefaultTransactionDate();
+    setDefaultPlannerDate();
     loadDashboard();
 }
 
