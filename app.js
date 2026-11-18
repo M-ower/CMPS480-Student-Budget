@@ -1332,9 +1332,9 @@ function formatMoney(amount) {
 // ============================================
 
 if (transactionForm) {
-
+    setupMonthSelector();
+    setDefaultTransactionDate();
     loadDashboard();
-
 }
 
 
