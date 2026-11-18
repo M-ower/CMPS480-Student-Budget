@@ -18,64 +18,114 @@ const transactionFilter = document.getElementById("transactionFilter");
 // ============================================
 
 
+// Dashboard month selector
+const monthSelector = document.getElementById("monthSelector");
+const transactionDateInput = document.getElementById("transactionDate");
 
-async function loadDashboard(useServerData = true) {
+// Get current month in local time
+function getCurrentMonth() {
+    const today = new Date();
 
-    try {
+    return today.getFullYear() + "-" +
+        String(today.getMonth() + 1).padStart(2, "0");
+}
 
-        let transactionData;
+// Fill dropdown with the last 12 months
+function setupMonthSelector() {
+    if (!monthSelector) return;
 
+    const today = new Date();
+    monthSelector.innerHTML = "";
 
-        // On initial page load, use the hard-coded JSON.
-        // This simulates transaction data received
-        // from a server/database.
-
-        if (!useServerData) {
-
-            transactionData =
-                await loadTransactionData();
-
-        } else {
-
-            // After the user adds or clears a transaction,
-            // use the real server data.
-
-            const transactionResponse =
-                await fetch("/api/transactions");
-
-            transactionData =
-                await transactionResponse.json();
-
-        }
-
-
-        const budgetResponse =
-            await fetch("/api/budgets");
-
-        const budgetData =
-            await budgetResponse.json();
-
-
-        displayTransactions(
-            transactionData.transactions
+    for (let i = 0; i < 12; i++) {
+        const date = new Date(
+            today.getFullYear(),
+            today.getMonth() - i,
+            1
         );
 
+        const value = date.getFullYear() + "-" +
+            String(date.getMonth() + 1).padStart(2, "0");
+
+        const option = document.createElement("option");
+
+        option.value = value;
+        option.textContent = date.toLocaleDateString("en-US", {
+            month: "long",
+            year: "numeric"
+        });
+
+        monthSelector.appendChild(option);
+    }
+
+    monthSelector.value = getCurrentMonth();
+
+    monthSelector.addEventListener("change", function() {
+        loadDashboard();
+    });
+}
+
+// Default transaction date to today
+function setDefaultTransactionDate() {
+    if (!transactionDateInput) return;
+
+    const today = new Date();
+
+    transactionDateInput.value =
+        today.getFullYear() + "-" +
+        String(today.getMonth() + 1).padStart(2, "0") + "-" +
+        String(today.getDate()).padStart(2, "0");
+}
+
+async function loadDashboard() {
+    try {
+        const month = monthSelector
+            ? monthSelector.value
+            : getCurrentMonth();
+
+        // Load transactions for selected month
+        const transactionResponse = await fetch(
+            "/api/transactions?month=" + encodeURIComponent(month),
+            { credentials: "same-origin" }
+        );
+
+        const transactionData = await transactionResponse.json();
+
+        if (!transactionResponse.ok || !transactionData.success) {
+            throw new Error(
+                transactionData.message || "Could not load transactions."
+            );
+        }
+
+        // Load budget for selected month
+        const budgetResponse = await fetch(
+            "/api/budgets?month=" + encodeURIComponent(month),
+            { credentials: "same-origin" }
+        );
+
+        const budgetData = await budgetResponse.json();
+
+        if (!budgetResponse.ok || !budgetData.success) {
+            throw new Error(
+                budgetData.message || "Could not load budget."
+            );
+        }
+
+        // Ignore outdated responses if user switched months
+        if (monthSelector && monthSelector.value !== month) {
+            return;
+        }
+
+        displayTransactions(transactionData.transactions);
 
         updateDashboardSummary(
             transactionData.transactions,
-            budgetData.budget.amount
+            Number(budgetData.budget?.amount) || 0
         );
-
 
     } catch (error) {
-
-        console.error(
-            "Error loading dashboard:",
-            error
-        );
-
+        console.error("Error loading dashboard:", error);
     }
-
 }
 
 // Automatically update categories based on transaction type
@@ -142,7 +192,7 @@ if (transactionForm) {
 
         const amount =
             Number(document.getElementById("amount").value);
-
+            const date = transactionDateInput.value;
 
         try {
 
@@ -158,7 +208,8 @@ if (transactionForm) {
                     type: type,
                     description: description,
                     category: category,
-                    amount: amount
+                    amount: amount,
+                     date: date
                 })
 
             });
@@ -191,6 +242,7 @@ if (transactionForm) {
 
             transactionForm.reset();
             updateTransactionCategories();
+            setDefaultTransactionDate();
 
             loadDashboard(true); // () -> changed to true
 
@@ -263,6 +315,8 @@ function displayTransactions(transactions) {
             const row =
                 document.createElement("tr");
 
+            const dateCell = document.createElement("td");
+            dateCell.textContent = transaction.date || "N/A";
 
             const descriptionCell =
                 document.createElement("td");
@@ -304,6 +358,7 @@ function displayTransactions(transactions) {
 
             }
 
+            row.appendChild(dateCell);
 
             row.appendChild(descriptionCell);
 
@@ -418,10 +473,12 @@ if (clearHistoryButton) {
         "click",
         async function() {
 
-            const confirmed =
-                confirm(
-                    "Are you sure you want to clear all transaction history?"
-                );
+        const month = monthSelector.value;
+
+        const confirmed = confirm(
+            "Are you sure you want to clear all transactions for " +
+            month + "?"
+);      
 
 
             if (!confirmed) {
@@ -431,13 +488,13 @@ if (clearHistoryButton) {
 
             try {
 
-                const response =
-                    await fetch(
-                        "/api/transactions",
-                        {
-                            method: "DELETE"
-                        }
-                    );
+                const response = await fetch(
+                    "/api/transactions?month=" + encodeURIComponent(month),
+                    {
+                        method: "DELETE",
+                        credentials: "same-origin"
+                    }
+                );
 
 
                 const data =
@@ -446,7 +503,7 @@ if (clearHistoryButton) {
 
                 if (data.success) {
 
-                    loadDashboard(true); // () -> true
+                    loadDashboard();
 
                 }
 

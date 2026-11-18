@@ -60,6 +60,15 @@
 
     </section>
 
+    <!-- MONTH SELECTOR -->
+    <section class="content-card">
+        <div class="form-group">
+            <label for="monthSelector">Select Month</label>
+            <select id="monthSelector">
+                <!-- Months will be added by JavaScript -->
+            </select>
+        </div>
+    </section>
 
     <!-- SUMMARY CARDS -->
 
@@ -146,7 +155,15 @@
                 </select>
 
             </div>
-
+            <!-- TRANSACTION DATE -->
+            <div class="form-group">
+                <label for="transactionDate">Transaction Date</label>
+                <input
+                  type="date"
+                  id="transactionDate"
+                    required
+                >
+            </div>
 
             <!-- DESCRIPTION -->
 
@@ -345,7 +362,7 @@
                 </div>
 
             <button
-                id="clearHistory"
+                id="Clear Your Seelcted Month"
                 class="delete-button"
                 type="button"
             >
@@ -362,6 +379,7 @@
                 <thead>
 
                     <tr>
+                        <th>Date</th>
                         <th>Description</th>
                         <th>Category</th>
                         <th>Type</th>
