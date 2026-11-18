@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-        const selectedMonth = getPlannerMonth();
+        const selectedMonth = transactionDate.slice(0, 7);
 
         const type = typeSelect.value;
         const description = descriptionInput.value.trim();
@@ -112,8 +112,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             // Retrieve the latest transactions from the server
-            const selectedMonth = getSelectedMonth();
-
             const response = await fetch(
             `/api/transactions?month=${selectedMonth}`,
             {
