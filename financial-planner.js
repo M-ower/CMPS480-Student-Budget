@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const confirmButton = document.getElementById("plannerConfirm");
     const discardButton = document.getElementById("plannerDiscard");
     const monthSelector = document.getElementById("monthSelector");
+    const dateInput = document.getElementById("plannerDate");
 
     function getSelectedMonth() {
     return monthSelector?.value || new Date().toISOString().slice(0, 7);
@@ -31,6 +32,19 @@ document.addEventListener("DOMContentLoaded", () => {
         toggleButton.textContent = opening ? "Close Planner" : "Open Planner";
         toggleButton.setAttribute("aria-expanded", String(opening));
     });
+
+        function getPlannerMonth() {
+        return dateInput.value.slice(0, 7);
+    }
+
+    function setPlannerDateFromMonth() {
+        const month = document.getElementById("monthSelector")?.value;
+
+        if (month && /^\d{4}-\d{2}$/.test(month)) {
+            dateInput.value = `${month}-01`;
+        }   
+    }
+            setPlannerDateFromMonth();
 
     // Use the same categories as the existing transaction form
     const categories = {
@@ -62,10 +76,11 @@ document.addEventListener("DOMContentLoaded", () => {
     updateCategories();
 
     // Any changes invalidate the previous preview
-    [descriptionInput, amountInput, categorySelect].forEach(input => {
+    [descriptionInput, amountInput, categorySelect, dateInput].forEach(input => {
         input.addEventListener("input", () => {
             result.hidden = true;
-        });
+            preview = null;
+        }); 
     });
 
     let preview = null;
@@ -75,6 +90,15 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
         result.hidden = true;
         preview = null;
+
+        const transactionDate = dateInput.value;
+
+    if (!transactionDate) {
+        alert("Please select a transaction date.");
+        return;
+    }
+
+        const selectedMonth = getPlannerMonth();
 
         const type = typeSelect.value;
         const description = descriptionInput.value.trim();
@@ -342,7 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
             category,
             amount,
             month: selectedMonth,
-            date: `${selectedMonth}-01`
+            date: transactionDate
 };
             result.hidden = false;
 
@@ -362,7 +386,7 @@ document.addEventListener("DOMContentLoaded", () => {
             descriptionInput.value.trim() !== preview.description ||
             categorySelect.value !== preview.category ||
             Number(amountInput.value) !== preview.amount ||
-            getSelectedMonth() !== preview.month
+            dateInput.value !== preview.date
         ) {
             result.hidden = true;
             preview = null;
