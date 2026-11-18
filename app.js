@@ -61,6 +61,7 @@ function setupMonthSelector() {
     monthSelector.value = getCurrentMonth();
 
     monthSelector.addEventListener("change", function() {
+        setDefaultTransactionDate();
         loadDashboard();
     });
 }
@@ -70,11 +71,19 @@ function setDefaultTransactionDate() {
     if (!transactionDateInput) return;
 
     const today = new Date();
+    const selectedMonth = monthSelector
+        ? monthSelector.value
+        : getCurrentMonth();
 
-    transactionDateInput.value =
-        today.getFullYear() + "-" +
-        String(today.getMonth() + 1).padStart(2, "0") + "-" +
-        String(today.getDate()).padStart(2, "0");
+    const currentMonth = getCurrentMonth();
+
+    if (selectedMonth === currentMonth) {
+        transactionDateInput.value =
+            selectedMonth + "-" +
+            String(today.getDate()).padStart(2, "0");
+    } else {
+        transactionDateInput.value = selectedMonth + "-01";
+    }
 }
 
 async function loadDashboard() {
@@ -244,7 +253,7 @@ if (transactionForm) {
             updateTransactionCategories();
             setDefaultTransactionDate();
 
-            loadDashboard(true); // () -> changed to true
+            loadDashboard();
 
 
         } catch (error) {
