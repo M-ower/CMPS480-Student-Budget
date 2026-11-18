@@ -17,6 +17,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const confirmButton = document.getElementById("plannerConfirm");
     const discardButton = document.getElementById("plannerDiscard");
+    const monthSelector = document.getElementById("monthSelector");
+
+    function getSelectedMonth() {
+    return monthSelector?.value || new Date().toISOString().slice(0, 7);
+    }
 
     // Open and close the planner
     toggleButton.addEventListener("click", () => {
@@ -83,9 +88,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             // Retrieve the latest transactions from the server
-            const response = await fetch("/api/transactions", {
+            const selectedMonth = getSelectedMonth();
+
+            const response = await fetch(
+            `/api/transactions?month=${selectedMonth}`,
+            {
                 credentials: "same-origin"
-            });
+            }
+);
 
             if (response.status === 401 || response.status === 403) {
             throw new Error("Please log in to use the Financial Planner.");
@@ -325,7 +335,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-            preview = { type, description, category, amount };
+
+            preview = {
+            type,
+            description,
+            category,
+            amount,
+            month: selectedMonth,
+            date: `${selectedMonth}-01`
+};
             result.hidden = false;
 
         } catch (error) {
@@ -343,7 +361,8 @@ document.addEventListener("DOMContentLoaded", () => {
             typeSelect.value !== preview.type ||
             descriptionInput.value.trim() !== preview.description ||
             categorySelect.value !== preview.category ||
-            Number(amountInput.value) !== preview.amount
+            Number(amountInput.value) !== preview.amount ||
+            getSelectedMonth() !== preview.month
         ) {
             result.hidden = true;
             preview = null;
@@ -386,6 +405,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+        monthSelector?.addEventListener("change", () => {
+        result.hidden = true;
+        preview = null;
+});
+    
     // Discard the planned transaction
     discardButton.addEventListener("click", () => {
         form.reset();
