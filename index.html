@@ -248,56 +248,72 @@
             Enter the details below to preview your financial situation.
         </p>
 
-        <form id="plannerForm" class="transaction-form">
+        
+            <form id="plannerForm" class="transaction-form">
 
-            <div class="form-group">
-                <label for="plannerType">Transaction Type</label>
-                <label for="plannerDate">Transaction Date</label>
-                <input type="date" id="plannerDate" required>     
-                <select id="plannerType" required>
-                    <option value="expense">Expense</option>
-                    <option value="income">Income</option>
-                </select>
-            </div>
+             <!-- Transaction Type -->
+                <div class="form-group">
+                    <label for="plannerType">Transaction Type</label>
+                    <select id="plannerType" required>
+                        <option value="expense">Expense</option>
+                        <option value="income">Income</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="plannerDescription">Description</label>
-                <input
-                    type="text"
-                    id="plannerDescription"
-                    placeholder="Example: New Laptop"
-                    required
+                <!-- Transaction Date -->
+                <div class="form-group">
+                    <label for="plannerDate">Transaction Date</label>
+                    <input type="date" id="plannerDate" required>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label for="plannerDescription">Description</label>
+                    <input
+                        type="text"
+                        id="plannerDescription"
+                        placeholder="Example: New Laptop"
+                        required
+                    >
+                </div>
+
+                <!-- Category -->
+                <div class="form-group">
+                    <label for="plannerCategory">Category</label>
+                    <select id="plannerCategory" required>
+                        <option value="">Select Category</option>
+                    </select>
+                </div>
+
+                <!-- Amount -->
+                <div class="form-group">
+                    <label for="plannerAmount">Amount ($)</label>
+                    <input
+                        type="number"
+                        id="plannerAmount"
+                        min="0.01"
+                        step="0.01"
+                        placeholder="0.00"
+                        required
+                    >
+                </div>
+
+                <!-- Preview Button -->
+                <button type="submit" class="primary-button">
+                    Preview Transaction
+                </button>
+
+                <!-- Discard Button -->
+                <button
+                    type="button"
+                    id="plannerDiscard"
+                    class="planner-discard"
                 >
-            </div>
+                    Discard
+                </button>
 
-            <div class="form-group">
-                <label for="plannerCategory">Category</label>
-                <select id="plannerCategory" required>
-                    <option value="">Select Category</option>
-                </select>
-            </div>
+            </form>
 
-            <div class="form-group">
-                <label for="plannerAmount">Amount ($)</label>
-                <input
-                    type="number"
-                    id="plannerAmount"
-                    min="0.01"
-                    step="0.01"
-                    placeholder="0.00"
-                    required
-                >
-            </div>
-
-            <button type="submit" class="primary-button">
-                Preview Transaction
-            </button>
-
-            <button type="button" id="plannerDiscard" class="planner-discard">
-                Discard
-            </button>
-
-        </form>
 
         <div id="plannerResult" class="planner-result" hidden>
             <h3>Financial Preview</h3>

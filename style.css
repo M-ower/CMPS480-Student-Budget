@@ -1173,6 +1173,42 @@ textarea:focus {
     margin: 0;
     line-height: 1.5;
 }
+
+/* ============================================
+   FINANCIAL PLANNER FORM LAYOUT
+============================================ */
+
+#plannerForm {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    align-items: end;
+}
+
+#plannerForm .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+#plannerForm .form-group input,
+#plannerForm .form-group select {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#plannerForm button {
+    width: 100%;
+}
+
+/* Mobile Layout */
+@media (max-width: 600px) {
+    #plannerForm {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* ============================================
    SAVINGS GOALS
 ============================================ */
