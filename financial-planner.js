@@ -93,10 +93,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const transactionDate = dateInput.value;
 
-    if (!transactionDate) {
-        alert("Please select a transaction date.");
-        return;
-    }
+        if (
+            !transactionDate ||
+            transactionDate < "2026-01-01" ||
+            transactionDate > "2026-12-31"
+            ){
+            alert("Please select a planner date within 2026.");
+            return;
+            }
 
         const selectedMonth = transactionDate.slice(0, 7);
 
@@ -393,6 +397,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         confirmButton.disabled = true;
+
+        if (
+            !preview ||
+            !preview.date ||
+            preview.date < "2026-01-01" ||
+            preview.date > "2026-12-31"
+        )   {
+            alert("Please select a valid planner date within 2026.");
+            return;
+            }
 
         try {
             const response = await fetch("/api/transactions", {

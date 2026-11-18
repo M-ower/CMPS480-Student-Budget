@@ -30,26 +30,23 @@ function getCurrentMonth() {
         String(today.getMonth() + 1).padStart(2, "0");
 }
 
-// Fill dropdown with the last 12 months
+// Fill with the 12 calander months
+
 function setupMonthSelector() {
     if (!monthSelector) return;
 
-    const today = new Date();
+    const currentYear = 2026;
     monthSelector.innerHTML = "";
 
-    for (let i = 0; i < 12; i++) {
-        const date = new Date(
-            today.getFullYear(),
-            today.getMonth() - i,
-            1
-        );
+    for (let month = 0; month < 12; month++) {
+        const date = new Date(currentYear, month, 1);
 
-        const value = date.getFullYear() + "-" +
-            String(date.getMonth() + 1).padStart(2, "0");
+        const value = currentYear + "-" +
+            String(month + 1).padStart(2, "0");
 
         const option = document.createElement("option");
-
         option.value = value;
+
         option.textContent = date.toLocaleDateString("en-US", {
             month: "long",
             year: "numeric"
@@ -58,7 +55,11 @@ function setupMonthSelector() {
         monthSelector.appendChild(option);
     }
 
-    monthSelector.value = getCurrentMonth();
+    const currentMonth = getCurrentMonth();
+    
+        monthSelector.value = currentMonth.startsWith("2026-")
+        ? currentMonth
+        : "2026-12";
 
     monthSelector.addEventListener("change", function() {
         setDefaultTransactionDate();
@@ -66,14 +67,17 @@ function setupMonthSelector() {
     });
 }
 
+
 // Default transaction date to today
+
 function setDefaultTransactionDate() {
     if (!transactionDateInput) return;
 
     const today = new Date();
+
     const selectedMonth = monthSelector
         ? monthSelector.value
-        : getCurrentMonth();
+        : "2026-01";
 
     const currentMonth = getCurrentMonth();
 
@@ -85,6 +89,7 @@ function setDefaultTransactionDate() {
         transactionDateInput.value = selectedMonth + "-01";
     }
 }
+
 
 async function loadDashboard() {
     try {
@@ -202,7 +207,10 @@ if (transactionForm) {
         const amount =
             Number(document.getElementById("amount").value);
             const date = transactionDateInput.value;
-
+                if (!date || date < "2026-01-01" || date > "2026-12-31") {
+                alert("Please select a transaction date within 2026.");
+                return;
+}
         try {
 
             const response = await fetch("/api/transactions", {

@@ -161,6 +161,8 @@
                 <input
                   type="date"
                   id="transactionDate"
+                  min="2026-01-01"
+                  max="2026-12-31"
                     required
                 >
             </div>
@@ -261,10 +263,16 @@
                 </div>
 
                 <!-- Transaction Date -->
-                <div class="form-group">
-                    <label for="plannerDate">Transaction Date</label>
-                    <input type="date" id="plannerDate" required>
-                </div>
+                    <div class="form-group">
+                        <label for="plannerDate">Transaction Date</label>
+                        <input
+                            type="date"
+                            id="plannerDate"
+                            min="2026-01-01"
+                            max="2026-12-31"
+                            required
+                        >
+                    </div>      
 
                 <!-- Description -->
                 <div class="form-group">
