@@ -475,61 +475,55 @@ function updateDashboardSummary(
 }
 
 
-// Clear transaction history
+
+// Clear history for the selected month
 if (clearHistoryButton) {
-
-    clearHistoryButton.addEventListener(
-        "click",
-        async function() {
-
-        const month = monthSelector.value;
+    clearHistoryButton.addEventListener("click", async function() {
+        const month = monthSelector
+            ? monthSelector.value
+            : getCurrentMonth();
 
         const confirmed = confirm(
-            "Are you sure you want to clear all transactions for " +
-            month + "?"
-);      
+            "Are you sure you want to delete all transactions for " +
+            month + "? This cannot be undone."
+        );
 
-
-            if (!confirmed) {
-                return;
-            }
-
-
-            try {
-
-                const response = await fetch(
-                    "/api/transactions?month=" + encodeURIComponent(month),
-                    {
-                        method: "DELETE",
-                        credentials: "same-origin"
-                    }
-                );
-
-
-                const data =
-                    await response.json();
-
-
-                if (data.success) {
-
-                    loadDashboard();
-
-                }
-
-
-            } catch (error) {
-
-                console.error(
-                    "Error clearing history:",
-                    error
-                );
-
-            }
-
+        if (!confirmed) {
+            return;
         }
-    );
 
+        clearHistoryButton.disabled = true;
+
+        try {
+            const response = await fetch(
+                "/api/transactions?month=" + encodeURIComponent(month),
+                {
+                    method: "DELETE",
+                    credentials: "same-origin"
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.message || "Could not clear transaction history."
+                );
+            }
+
+            alert("Transactions for " + month + " were cleared successfully.");
+
+            await loadDashboard();
+
+        } catch (error) {
+            console.error("Error clearing history:", error);
+            alert(error.message || "Could not clear transaction history.");
+        } finally {
+            clearHistoryButton.disabled = false;
+        }
+    });
 }
+
 
 // ============================================
 // HARD-CODED TRANSACTION JSON (DATABASE SIMULATION)

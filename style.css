@@ -1209,6 +1209,25 @@ textarea:focus {
     }
 }
 
+/* Financial Planner Buttons Fix */
+
+.planner-actions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.planner-actions button {
+    width: 100%;
+}
+
+@media (max-width: 600px) {
+    .planner-actions {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* ============================================
    SAVINGS GOALS
 ============================================ */
