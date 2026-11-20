@@ -174,12 +174,6 @@
         <h2>Financial Insights</h2>
         <p>A quick overview of your finances based on your recorded transactions.</p>
     </div>
-    <div class="form-group">
-    <label for="profileMonthSelector">Select Month</label>
-    <select id="profileMonthSelector">
-        <!-- Months populated by profile.js -->
-    </select>
-</div>
 
     <!-- Income vs Expenses -->
     <div class="financial-chart">
@@ -217,12 +211,6 @@
     </div>
 
     <p id="insightMessage" class="message" role="status"></p>
-    <div class="profile-notifications">
-    <h3>Financial Notifications</h3>
-    <p id="financialNotification">
-        Select a month to view your financial notifications.
-    </p>
-</div>
 
 </section>
   
@@ -238,6 +226,18 @@
         <p>Student Budget Tracker - CMPS480 Team Project</p>
     </footer>
 
+                <!-- Spending Notification -->
+            <div id="spendingToast" class="spending-toast" role="status" aria-live="polite" hidden>
+                <div class="toast-content">
+                    <strong id="toastTitle">Spending Alert</strong>
+                    <p id="toastMessage"></p>
+                </div>
+
+                <button type="button" id="toastClose" class="toast-close"
+                        aria-label="Close notification">
+                    &times;
+                </button>   
+            </div>
     <script src="profile.js" defer></script>
 
 </body>

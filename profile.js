@@ -23,33 +23,53 @@ const incomeBar = document.getElementById("incomeBar");
 const expenseBar = document.getElementById("expenseBar");
 const personalizedInsight = document.getElementById("personalizedInsight");
 const insightMessage = document.getElementById("insightMessage");
-
-
 const profileMonthSelector = document.getElementById("profileMonthSelector");
 const financialNotification = document.getElementById("financialNotification");
 
-// Populate January through December 2026
-function setupProfileMonthSelector() {
-    const currentMonth = new Date().getMonth();
+// Floating spending notification
+const spendingToast = document.getElementById("spendingToast");
+const toastTitle = document.getElementById("toastTitle");
+const toastMessage = document.getElementById("toastMessage");
+const toastClose = document.getElementById("toastClose");
 
-    profileMonthSelector.innerHTML = "";
+let toastTimer;
+let showToastOnLoad = true;
 
-    for (let month = 0; month < 12; month++) {
-        const date = new Date(2026, month, 1);
+function hideSpendingToast() {
+    spendingToast.hidden = true;
+    clearTimeout(toastTimer);
+}
 
-        const option = document.createElement("option");
-        option.value = `2026-${String(month + 1).padStart(2, "0")}`;
-        option.textContent = date.toLocaleString("en-US", {
-            month: "long",
-            year: "numeric"
-        });
+toastClose.addEventListener("click", hideSpendingToast);
 
-        profileMonthSelector.appendChild(option);
+function showSpendingToast(income, expenses) {
+    // Only show automatically on the initial Profile load
+    if (!showToastOnLoad) return;
+    showToastOnLoad = false;
+
+    if (income <= 0 || expenses < income * 0.8) return;
+
+    spendingToast.classList.remove("warning", "caution");
+
+    if (expenses > income) {
+        spendingToast.classList.add("warning");
+        toastTitle.textContent = "Spending Warning";
+        toastMessage.textContent =
+            `Your expenses exceed your income by $${(expenses - income).toFixed(2)} this month.`;
+
+    } else {
+        spendingToast.classList.add("caution");
+        toastTitle.textContent = "Spending Caution";
+        toastMessage.textContent =
+            `You've used ${((expenses / income) * 100).toFixed(1)}% of your monthly income.`;
     }
 
-    profileMonthSelector.value =
-        `2026-${String(currentMonth + 1).padStart(2, "0")}`;
+    spendingToast.hidden = false;
+
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideSpendingToast, 6000);
 }
+
 
 function updateProfilePreview() {
     const name = displayNameInput.value.trim();
@@ -108,6 +128,7 @@ async function loadProfile() {
     }
 }
 
+// Load financial insights from the backend
 async function loadFinancialInsights() {
     const selectedMonth = profileMonthSelector.value;
 
@@ -156,6 +177,7 @@ async function loadFinancialInsights() {
         });
 
         const balance = income - expenses;
+        showSpendingToast(income, expenses);
 
         // Update financial summary
         insightIncome.textContent = `$${income.toFixed(2)}`;
@@ -247,6 +269,8 @@ async function loadFinancialInsights() {
     }
 }
 
+
+
 // Save changes to MySQL through the backend
 profileForm.addEventListener("submit", async function(event) {
     event.preventDefault();
@@ -288,7 +312,7 @@ priorityForm.addEventListener("submit", async function(event) {
     event.preventDefault();
 
     priorityMessage.textContent = "Saving...";
-
+    
     try {
         const response = await fetch("/api/profile/priority", {
             method: "PUT",
@@ -325,15 +349,12 @@ priorityForm.addEventListener("submit", async function(event) {
 });
 
     // Load profile first, then financial insights
-   async function initializeProfile() {
-    setupProfileMonthSelector();
-    await loadProfile();
-    await loadFinancialInsights();
+    async function initializeProfile() {
+        setupProfileMonthSelector();
+        await loadProfile();
+        await loadFinancialInsights();
+
 }
-
-profileMonthSelector.addEventListener("change", loadFinancialInsights);
-
-
 
 // Logout button
 const logoutButton = document.getElementById("logoutButton");
@@ -357,3 +378,8 @@ logoutButton.addEventListener("click", async () => {
 });
 
     initializeProfile();
+    profileMonthSelector.addEventListener("change", () => {
+    hideSpendingToast();
+    showToastOnLoad = false;
+    loadFinancialInsights();
+});
