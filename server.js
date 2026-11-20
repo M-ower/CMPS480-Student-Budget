@@ -58,11 +58,12 @@ let transactions = [];
 let budget = {
     amount: 0
 };
- // ==============================
- // TRANSACTIONS - MYSQL
- // ==============================
 
- // Add a transaction
+// ==============================
+// TRANSACTIONS - MYSQL
+// ==============================
+
+// Add a transaction
 app.post("/api/transactions", async (req, res) => {
     const { type, description, category, amount, date } = req.body;
     const userId = req.session.userId;
@@ -170,7 +171,7 @@ app.post("/api/transactions", async (req, res) => {
     }
 });
 
-// Get transactions for the a selected month
+// Get transactions for the selected month
 app.get("/api/transactions", async (req, res) => {
     const userId = req.session.userId;
 
@@ -238,7 +239,7 @@ app.get("/api/transactions", async (req, res) => {
     }
 });
 
- // Clear transactions for the selected month
+// Clear transactions for the selected month
 app.delete("/api/transactions", async (req, res) => {
     const userId = req.session.userId;
 
@@ -287,10 +288,8 @@ app.delete("/api/transactions", async (req, res) => {
             success: false,
             message: "Could not clear transactions."
         });
-        
     }
 });
-
 
 // ==============================
 // MONTHLY BUDGET
@@ -299,7 +298,6 @@ app.delete("/api/transactions", async (req, res) => {
 // Save or update a budget for the selected month
 app.post("/api/budgets", async (req, res) => {
     const userId = req.session.userId;
-    const amount = Number(req.body.amount);
 
     if (!userId) {
         return res.status(401).json({
@@ -308,6 +306,9 @@ app.post("/api/budgets", async (req, res) => {
         });
     }
 
+    const amount = Number(req.body.amount);
+    const month = req.body.month;
+
     if (!Number.isFinite(amount) || amount <= 0) {
         return res.status(400).json({
             success: false,
@@ -315,48 +316,37 @@ app.post("/api/budgets", async (req, res) => {
         });
     }
 
-    const currentMonth = new Date().toISOString().slice(0, 7);
-    const month = req.body.month || currentMonth;
-
+    // Only allow months in 2026
     if (
         typeof month !== "string" ||
-        !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)
+        !/^2026-(0[1-9]|1[0-2])$/.test(month)
     ) {
         return res.status(400).json({
             success: false,
-            message: "Invalid month. Use YYYY-MM format."
+            message: "Please select a valid month in 2026."
         });
     }
 
     const startDate = `${month}-01`;
 
+    // Debug: confirm which user's monthly budget is being saved
+    console.log("[SAVE BUDGET]", {
+        userId,
+        month,
+        amount,
+        startDate
+    });
+
     try {
-        const [existingBudgets] = await db.execute(
-            `SELECT budget_id
-             FROM budgets
-             WHERE user_id = ?
-               AND budget_month = ?
-             ORDER BY budget_id DESC
-             LIMIT 1`,
-            [userId, startDate]
+        await db.execute(
+            `INSERT INTO budgets (user_id, amount, budget_month)
+             VALUES (?, ?, ?)
+             ON DUPLICATE KEY UPDATE
+                amount = VALUES(amount)`,
+            [userId, amount, startDate]
         );
 
-        if (existingBudgets.length > 0) {
-            await db.execute(
-                `UPDATE budgets
-                 SET amount = ?
-                 WHERE budget_id = ? AND user_id = ?`,
-                [amount, existingBudgets[0].budget_id, userId]
-            );
-        } else {
-            await db.execute(
-                `INSERT INTO budgets (user_id, amount, budget_month)
-                 VALUES (?, ?, ?)`,
-                [userId, amount, startDate]
-            );
-        }
-
-        res.status(200).json({
+        res.json({
             success: true,
             message: "Monthly budget saved successfully.",
             budget: {
@@ -375,7 +365,6 @@ app.post("/api/budgets", async (req, res) => {
     }
 });
 
-
 // Get the budget and spending for the selected month
 app.get("/api/budgets", async (req, res) => {
     const userId = req.session.userId;
@@ -390,17 +379,25 @@ app.get("/api/budgets", async (req, res) => {
     const currentMonth = new Date().toISOString().slice(0, 7);
     const month = req.query.month || currentMonth;
 
+    // Only allow months in 2026
     if (
         typeof month !== "string" ||
-        !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)
+        !/^2026-(0[1-9]|1[0-2])$/.test(month)
     ) {
         return res.status(400).json({
             success: false,
-            message: "Invalid month. Use YYYY-MM format."
+            message: "Please select a valid month in 2026."
         });
     }
 
     const startDate = `${month}-01`;
+
+    // Debug: confirm which user's monthly budget is being loaded
+    console.log("[LOAD BUDGET]", {
+        userId,
+        month,
+        startDate
+    });
 
     try {
         const [budgetRows] = await db.execute(
@@ -581,8 +578,6 @@ app.get("/api/goals", async (req, res) => {
         });
     }
 });
-
-
 
 // ==============================
 // ANALYTICS
@@ -938,6 +933,7 @@ app.get("/api/profile", async (req, res) => {
         });
     }
 });
+
 // Save logged-in user's profile
 app.put("/api/profile", async (req, res) => {
     const userId = req.session.userId;
@@ -1012,8 +1008,7 @@ app.put("/api/profile", async (req, res) => {
     }
 });
 
-
- // Save the logged-in user's financial preference
+// Save the logged-in user's financial preference
 app.put("/api/profile/priority", async (req, res) => {
     const userId = req.session.userId;
     const { financial_priority } = req.body;
@@ -1061,7 +1056,6 @@ app.put("/api/profile/priority", async (req, res) => {
         });
     }
 });
-
 
 // ==============================
 // START SERVER
