@@ -18,7 +18,7 @@ const transactionFilter = document.getElementById("transactionFilter");
 // ============================================
 
 
-// Dashboard month selector
+// Dashboard and Budget month selector
 const monthSelector = document.getElementById("monthSelector");
 const transactionDateInput = document.getElementById("transactionDate");
 
@@ -30,8 +30,8 @@ function getCurrentMonth() {
         String(today.getMonth() + 1).padStart(2, "0");
 }
 
-// Fill with the 12 calander months
 
+// Fill with the 12 calendar months
 function setupMonthSelector() {
     if (!monthSelector) return;
 
@@ -56,22 +56,39 @@ function setupMonthSelector() {
     }
 
     const currentMonth = getCurrentMonth();
-    
+    const savedMonth = localStorage.getItem("selectedMonth");
+
+    const validSavedMonth = savedMonth &&
+        monthSelector.querySelector(
+            'option[value="' + savedMonth + '"]'
+        );
+
+    if (validSavedMonth) {
+        monthSelector.value = savedMonth;
+    } else {
         monthSelector.value = currentMonth.startsWith("2026-")
-        ? currentMonth
-        : "2026-12";
+            ? currentMonth
+            : "2026-12";
+    }
 
     monthSelector.addEventListener("change", function() {
-        setDefaultTransactionDate();
-        setDefaultPlannerDate();
-        loadDashboard();
+        localStorage.setItem("selectedMonth", monthSelector.value);
+
+        if (transactionForm) {
+            setDefaultTransactionDate();
+            setDefaultPlannerDate();
+            loadDashboard();
+        }
+
+        if (budgetForm) {
+            loadBudgetPage();
+        }
     });
 }
 
 
 // Default transaction date to today
-
-function setDefaultTransactionDate() {  
+function setDefaultTransactionDate() {
     if (!transactionDateInput) return;
 
     const today = new Date();
@@ -90,6 +107,7 @@ function setDefaultTransactionDate() {
         transactionDateInput.value = selectedMonth + "-01";
     }
 }
+
 
 function setDefaultPlannerDate() {
     const plannerDateInput = document.getElementById("plannerDate");
@@ -111,6 +129,7 @@ function setDefaultPlannerDate() {
     // Notify the planner that its date changed
     plannerDateInput.dispatchEvent(new Event("change", { bubbles: true }));
 }
+
 
 async function loadDashboard() {
     try {
@@ -163,6 +182,7 @@ async function loadDashboard() {
     }
 }
 
+
 // Automatically update categories based on transaction type
 const transactionTypeSelect = document.getElementById("type");
 const transactionCategorySelect = document.getElementById("category");
@@ -173,25 +193,25 @@ function updateTransactionCategories() {
     }
 
     const categories = transactionTypeSelect.value === "income"
-    ? [
-        "Salary",
-        "Part-Time Job",
-        "Freelance",
-        "Gifts",
-        "Scholarships",
-        "Other Income"
-    ]
-    : [
-        "Food",
-        "Transportation",
-        "Entertainment",
-        "Housing",
-        "School",
-        "Bills",
-        "Shopping",
-        "Healthcare",
-        "Other Expense"
-    ];
+        ? [
+            "Salary",
+            "Part-Time Job",
+            "Freelance",
+            "Gifts",
+            "Scholarships",
+            "Other Income"
+        ]
+        : [
+            "Food",
+            "Transportation",
+            "Entertainment",
+            "Housing",
+            "School",
+            "Bills",
+            "Shopping",
+            "Healthcare",
+            "Other Expense"
+        ];
 
     transactionCategorySelect.innerHTML = "";
 
@@ -203,80 +223,56 @@ function updateTransactionCategories() {
     });
 }
 
+
 if (transactionTypeSelect && transactionCategorySelect) {
     transactionTypeSelect.addEventListener("change", updateTransactionCategories);
     updateTransactionCategories();
 }
 
+
 // Add transaction
 if (transactionForm) {
-
     transactionForm.addEventListener("submit", async function(event) {
-
         event.preventDefault();
 
+        const type = document.getElementById("type").value;
+        const description = document.getElementById("description").value;
+        const category = document.getElementById("category").value;
+        const amount = Number(document.getElementById("amount").value);
+        const date = transactionDateInput.value;
 
-        const type =
-            document.getElementById("type").value;
+        if (!date || date < "2026-01-01" || date > "2026-12-31") {
+            alert("Please select a transaction date within 2026.");
+            return;
+        }
 
-        const description =
-            document.getElementById("description").value;
-
-        const category =
-            document.getElementById("category").value;
-
-        const amount =
-            Number(document.getElementById("amount").value);
-            const date = transactionDateInput.value;
-                if (!date || date < "2026-01-01" || date > "2026-12-31") {
-                alert("Please select a transaction date within 2026.");
-                return;
-}
         try {
-
             const response = await fetch("/api/transactions", {
-
                 method: "POST",
-
                 headers: {
                     "Content-Type": "application/json"
                 },
-
                 body: JSON.stringify({
                     type: type,
                     description: description,
                     category: category,
                     amount: amount,
-                     date: date
+                    date: date
                 })
-
             });
 
+            const data = await response.json();
 
-            const data =
-                await response.json();
-
-
-            const message =
-                document.getElementById("transactionMessage");
-
+            const message = document.getElementById("transactionMessage");
 
             if (!data.success) {
-
                 message.textContent = data.message;
-
                 message.className = "message error";
-
                 return;
-
             }
 
-
-            message.textContent =
-                "Transaction added successfully.";
-
+            message.textContent = "Transaction added successfully.";
             message.className = "message success";
-
 
             transactionForm.reset();
             updateTransactionCategories();
@@ -284,225 +280,130 @@ if (transactionForm) {
 
             loadDashboard();
 
-
         } catch (error) {
-
             console.error("Error adding transaction:", error);
-
         }
-
     });
-
 }
 
 
 // Display transaction history
 function displayTransactions(transactions) {
-
     if (!transactionList) {
         return;
     }
 
-
     transactionList.innerHTML = "";
 
-
-    const emptyMessage =
-        document.getElementById("emptyMessage");
-
+    const emptyMessage = document.getElementById("emptyMessage");
 
     if (transactions.length === 0) {
-
         if (emptyMessage) {
             emptyMessage.style.display = "block";
         }
 
         return;
-
     }
-
 
     if (emptyMessage) {
         emptyMessage.style.display = "none";
     }
 
-
-    const selectedFilter =
-        transactionFilter
+    const selectedFilter = transactionFilter
         ? transactionFilter.value
         : "all";
 
-
-    const filteredTransactions =
-        transactions.filter(function(transaction) {
-
+    const filteredTransactions = transactions.filter(function(transaction) {
         if (selectedFilter === "all") {
             return true;
         }
 
         return transaction.type === selectedFilter;
-
     });
 
-
-        filteredTransactions
+    filteredTransactions
         .slice()
         .reverse()
-         .forEach(function(transaction) {
-
-            const row =
-                document.createElement("tr");
+        .forEach(function(transaction) {
+            const row = document.createElement("tr");
 
             const dateCell = document.createElement("td");
             dateCell.textContent = transaction.date || "N/A";
 
-            const descriptionCell =
-                document.createElement("td");
+            const descriptionCell = document.createElement("td");
+            descriptionCell.textContent = transaction.description;
 
-            descriptionCell.textContent =
-                transaction.description;
+            const categoryCell = document.createElement("td");
+            categoryCell.textContent = transaction.category;
 
-
-            const categoryCell =
-                document.createElement("td");
-
-            categoryCell.textContent =
-                transaction.category;
-
-
-            const typeCell =
-                document.createElement("td");
-
+            const typeCell = document.createElement("td");
             typeCell.textContent =
-                transaction.type === "income"
-                    ? "Income"
-                    : "Expense";
+                transaction.type === "income" ? "Income" : "Expense";
 
-
-            const amountCell =
-                document.createElement("td");
-
-            amountCell.textContent =
-                "$" + transaction.amount.toFixed(2);
-
+            const amountCell = document.createElement("td");
+            amountCell.textContent = "$" + transaction.amount.toFixed(2);
 
             if (transaction.type === "income") {
-
                 amountCell.classList.add("income-text");
-
             } else {
-
                 amountCell.classList.add("expense-text");
-
             }
 
             row.appendChild(dateCell);
-
             row.appendChild(descriptionCell);
-
             row.appendChild(categoryCell);
-
             row.appendChild(typeCell);
-
             row.appendChild(amountCell);
 
-
             transactionList.appendChild(row);
-
         });
-
 }
 
-    // Filter transactions by type
-    if (transactionFilter) {
 
-    transactionFilter.addEventListener(
-        "change",
-        function() {
-
-            loadDashboard();
-
-        }
-    );
-
+// Filter transactions by type
+if (transactionFilter) {
+    transactionFilter.addEventListener("change", function() {
+        loadDashboard();
+    });
 }
+
 
 // Update dashboard summary
-function updateDashboardSummary(
-    transactions,
-    monthlyBudget
-) {
-
+function updateDashboardSummary(transactions, monthlyBudget) {
     let income = 0;
-
     let expenses = 0;
 
-
     transactions.forEach(function(transaction) {
-
         if (transaction.type === "income") {
-
             income += transaction.amount;
-
         } else {
-
             expenses += transaction.amount;
-
         }
-
     });
 
+    const balance = income - expenses;
 
-    const balance =
-        income - expenses;
-
-
-    const incomeDisplay =
-        document.getElementById("income");
-
-    const expensesDisplay =
-        document.getElementById("expenses");
-
-    const balanceDisplay =
-        document.getElementById("balance");
-
-    const budgetDisplay =
-        document.getElementById("monthlyBudget");
-
+    const incomeDisplay = document.getElementById("income");
+    const expensesDisplay = document.getElementById("expenses");
+    const balanceDisplay = document.getElementById("balance");
+    const budgetDisplay = document.getElementById("monthlyBudget");
 
     if (incomeDisplay) {
-
-        incomeDisplay.textContent =
-            formatMoney(income);
-
+        incomeDisplay.textContent = formatMoney(income);
     }
-
 
     if (expensesDisplay) {
-
-        expensesDisplay.textContent =
-            formatMoney(expenses);
-
+        expensesDisplay.textContent = formatMoney(expenses);
     }
-
 
     if (balanceDisplay) {
-
-        balanceDisplay.textContent =
-            formatMoney(balance);
-
+        balanceDisplay.textContent = formatMoney(balance);
     }
-
 
     if (budgetDisplay) {
-
-        budgetDisplay.textContent =
-            formatMoney(monthlyBudget);
-
+        budgetDisplay.textContent = formatMoney(monthlyBudget);
     }
-
 }
-
 
 
 // Clear history for the selected month
@@ -568,139 +469,88 @@ async function loadTransactionData() {
     return await response.json();
 }
 
+
 // ============================================
 // BUDGET PAGE
 // ============================================
 
-
-// Load budget page
-const budgetForm =
-    document.getElementById("budgetForm");
+const budgetForm = document.getElementById("budgetForm");
 
 
+// Save budget for the selected month
 if (budgetForm) {
+    budgetForm.addEventListener("submit", async function(event) {
+        event.preventDefault();
 
-    budgetForm.addEventListener(
-        "submit",
-        async function(event) {
+        const amount = Number(
+            document.getElementById("budgetAmount").value
+        );
 
-            event.preventDefault();
+        const message = document.getElementById("budgetMessage");
 
+        const month = monthSelector
+            ? monthSelector.value
+            : getCurrentMonth();
 
-            const amount =
-                Number(
-                    document.getElementById(
-                        "budgetAmount"
-                    ).value
-                );
+        if (!Number.isFinite(amount) || amount <= 0) {
+            if (message) {
+                message.textContent = "Please enter a valid budget amount.";
+                message.className = "message error";
+            }
 
+            return;
+        }
 
-            const message =
-                document.getElementById(
-                    "budgetMessage"
-                );
+        try {
+            const response = await fetch("/api/budgets", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "same-origin",
+                body: JSON.stringify({
+                    amount: amount,
+                    month: month
+                })
+            });
 
+            const data = await response.json();
 
-            if (!Number.isFinite(amount) || amount < 0) {
-
+            if (!response.ok || !data.success) {
                 if (message) {
                     message.textContent =
-                        "Please enter a valid budget amount.";
+                        data.message || "Could not save the monthly budget.";
 
-                    message.className =
-                        "message error";
+                    message.className = "message error";
                 }
 
                 return;
             }
 
+            if (message) {
+                message.textContent =
+                    "Monthly budget saved successfully.";
 
-            try {
-
-                // Save the monthly budget to the database
-                // through the existing server API.
-
-                const response =
-                    await fetch(
-                        "/api/budgets",
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            credentials: "same-origin",
-
-                            body: JSON.stringify({
-                                amount: amount
-                            })
-                        }
-                    );
-
-
-                const data =
-                    await response.json();
-
-
-                if (!response.ok || !data.success) {
-
-                    if (message) {
-                        message.textContent =
-                            data.message ||
-                            "Could not save the monthly budget.";
-
-                        message.className =
-                            "message error";
-                    }
-
-                    return;
-
-                }
-
-
-                if (message) {
-                    message.textContent =
-                        "Monthly budget saved successfully.";
-
-                    message.className =
-                        "message success";
-                }
-
-
-                // Reload the budget from the server
-                // so the saved database value is displayed.
-
-                await loadBudgetPage();
-
-
-                budgetForm.reset();
-
-
-            } catch (error) {
-
-                console.error(
-                    "Error saving budget:",
-                    error
-                );
-
-                if (message) {
-                    message.textContent =
-                        "Could not save your budget. Please try again.";
-
-                    message.className =
-                        "message error";
-                }
-
+                message.className = "message success";
             }
 
+            // Reload the selected month's budget
+            await loadBudgetPage();
+
+            // Clear the amount field without changing the selected month
+            budgetForm.reset();
+
+        } catch (error) {
+            console.error("Error saving budget:", error);
+
+            if (message) {
+                message.textContent =
+                    "Could not save your budget. Please try again.";
+
+                message.className = "message error";
+            }
         }
-    );
-
-
-    loadBudgetPage();
-
+    });
 }
 
 
@@ -709,38 +559,32 @@ if (budgetForm) {
 // ============================================
 
 async function loadBudgetData() {
+    const month = monthSelector
+        ? monthSelector.value
+        : getCurrentMonth();
 
-    const response =
-        await fetch("/api/budgets", {
+    const response = await fetch(
+        "/api/budgets?month=" + encodeURIComponent(month),
+        {
             credentials: "same-origin"
-        });
-
+        }
+    );
 
     if (!response.ok) {
-
         throw new Error(
             "Could not load monthly budget from the server."
         );
-
     }
 
-
-    const data =
-        await response.json();
-
+    const data = await response.json();
 
     if (!data.success || !data.budget) {
-
         throw new Error(
-            data.message ||
-            "Could not load monthly budget."
+            data.message || "Could not load monthly budget."
         );
-
     }
 
-
     return data.budget;
-
 }
 
 
@@ -749,76 +593,41 @@ async function loadBudgetData() {
 // ============================================
 
 async function loadBudgetPage() {
-
     try {
+        const month = monthSelector
+            ? monthSelector.value
+            : getCurrentMonth();
 
-        // Read the saved monthly budget and spending
-        // information from the server/database.
+        // Load the selected month's budget and spending
+        const budgetData = await loadBudgetData();
 
-        const budgetData =
-            await loadBudgetData();
+        // Ignore outdated responses if the selected month changed
+        if (monthSelector && monthSelector.value !== month) {
+            return;
+        }
 
+        const monthlyBudget = Number(budgetData.amount) || 0;
+        const expenses = Number(budgetData.spent) || 0;
 
-        const monthlyBudget =
-            Number(budgetData.amount) || 0;
+        const remaining = budgetData.remaining !== undefined
+            ? Number(budgetData.remaining)
+            : monthlyBudget - expenses;
 
-
-        const expenses =
-            Number(budgetData.spent) || 0;
-
-
-        // Use the server's remaining amount when
-        // available; otherwise calculate it.
-
-        const remaining =
-            budgetData.remaining !== undefined
-                ? Number(budgetData.remaining)
-                : monthlyBudget - expenses;
-
-
-        const currentBudget =
-            document.getElementById(
-                "currentBudget"
-            );
-
-
-        const budgetSpent =
-            document.getElementById(
-                "budgetSpent"
-            );
-
-
-        const budgetRemaining =
-            document.getElementById(
-                "budgetRemaining"
-            );
-
+        const currentBudget = document.getElementById("currentBudget");
+        const budgetSpent = document.getElementById("budgetSpent");
+        const budgetRemaining = document.getElementById("budgetRemaining");
 
         if (currentBudget) {
-
-            currentBudget.textContent =
-                formatMoney(monthlyBudget);
-
+            currentBudget.textContent = formatMoney(monthlyBudget);
         }
-
 
         if (budgetSpent) {
-
-            budgetSpent.textContent =
-                formatMoney(expenses);
-
+            budgetSpent.textContent = formatMoney(expenses);
         }
-
 
         if (budgetRemaining) {
-
-            budgetRemaining.textContent =
-                formatMoney(remaining);
-
+            budgetRemaining.textContent = formatMoney(remaining);
         }
-
-
-        // Update the existing progress bar.
 
         updateBudgetProgress(
             monthlyBudget,
@@ -827,39 +636,25 @@ async function loadBudgetPage() {
             "budgetPageStatus"
         );
 
-
     } catch (error) {
+        console.error("Error loading budget:", error);
 
-        console.error(
-            "Error loading budget:",
-            error
-        );
-
-
-        const message =
-            document.getElementById(
-                "budgetMessage"
-            );
-
+        const message = document.getElementById("budgetMessage");
 
         if (message) {
-
             message.textContent =
                 "Could not load your budget. Please log in and try again.";
 
-            message.className =
-                "message error";
-
+            message.className = "message error";
         }
-
     }
-
 }
 
 
 // ============================================
 // ANALYTICS PAGE
 // ============================================
+
 async function loadAnalytics() {
     const categoryList = document.getElementById("categoryList");
 
@@ -916,6 +711,7 @@ async function loadAnalytics() {
         if (emptyMessage) {
             emptyMessage.textContent =
                 error.message || "Could not load analytics.";
+
             emptyMessage.style.display = "block";
         }
     }
@@ -929,8 +725,10 @@ function displayCategories(categories, totalExpenses) {
 
     const highestCategoryName =
         document.getElementById("highestCategoryName");
+
     const highestCategoryAmount =
         document.getElementById("highestCategoryAmount");
+
     const highestCategoryPercentage =
         document.getElementById("highestCategoryPercentage");
 
@@ -989,6 +787,7 @@ function displayCategories(categories, totalExpenses) {
         if (emptyMessage) {
             emptyMessage.textContent =
                 "Add some expenses to see your spending breakdown.";
+
             emptyMessage.style.display = "block";
         }
 
@@ -1145,96 +944,50 @@ function displayCategories(categories, totalExpenses) {
 // LOGIN
 // ============================================
 
-const loginForm =
-    document.getElementById("loginForm");
-
+const loginForm = document.getElementById("loginForm");
 
 if (loginForm) {
+    loginForm.addEventListener("submit", async function(event) {
+        event.preventDefault();
 
-    loginForm.addEventListener(
-        "submit",
-        async function(event) {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
 
-            event.preventDefault();
+        try {
+            const response = await fetch("/api/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "same-origin",
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            });
 
+            const data = await response.json();
 
-            const email =
-                document.getElementById(
-                    "email"
-                ).value;
+            const message = document.getElementById("loginMessage");
 
+            if (data.success) {
+                message.textContent = "Login successful. Welcome!";
+                message.className = "message success";
 
-            const password =
-                document.getElementById(
-                    "password"
-                ).value;
+                setTimeout(function() {
+                    window.location.href = "index.html";
+                }, 1000);
 
-
-            try {
-
-                const response = await fetch("/api/login", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                            },
-                        credentials: "same-origin",
-                        body: JSON.stringify({
-                        email: email,
-                        password: password
-    })
-});
-
-const data = await response.json();
-
-
-
-                const message =
-                    document.getElementById(
-                        "loginMessage"
-                    );
-
-
-                if (data.success) {
-
-                    message.textContent =
-                        "Login successful. Welcome!";
-
-                    message.className =
-                        "message success";
-
-
-                    setTimeout(function() {
-
-                        window.location.href =
-                            "index.html";
-
-                    }, 1000);
-
-                } else {
-
-                    message.textContent =
-                        data.message;
-
-                    message.className =
-                        "message error";
-
-                }
-
-
-            } catch (error) {
-
-                console.error(
-                    "Login error:",
-                    error
-                );
-
+            } else {
+                message.textContent = data.message;
+                message.className = "message error";
             }
 
+        } catch (error) {
+            console.error("Login error:", error);
         }
-    );
-
+    });
 }
-
 
 
 // ============================================
@@ -1291,7 +1044,6 @@ if (registerForm) {
 }
 
 
-
 // ============================================
 // BUDGET PROGRESS
 // ============================================
@@ -1335,6 +1087,7 @@ function updateBudgetProgress(
             ".";
 
         status.className = "budget-status over-budget";
+
     } else {
         progress.classList.remove("over-budget");
 
@@ -1353,9 +1106,7 @@ function updateBudgetProgress(
 // ============================================
 
 function formatMoney(amount) {
-
     return "$" + Number(amount).toFixed(2);
-
 }
 
 
@@ -1363,16 +1114,25 @@ function formatMoney(amount) {
 // START PAGE FUNCTIONS
 // ============================================
 
-if (transactionForm) {
+// Initialize the month selector on the Dashboard
+// and the Budget page.
+if (transactionForm || budgetForm) {
     setupMonthSelector();
+}
+
+// Dashboard-only startup functions
+if (transactionForm) {
     setDefaultTransactionDate();
     setDefaultPlannerDate();
     loadDashboard();
 }
 
+// Budget page startup
+if (budgetForm) {
+    loadBudgetPage();
+}
 
+// Analytics page startup
 if (document.getElementById("categoryList")) {
-
     loadAnalytics();
-
 }

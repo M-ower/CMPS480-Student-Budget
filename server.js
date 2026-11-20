@@ -295,7 +295,7 @@ app.delete("/api/transactions", async (req, res) => {
 // MONTHLY BUDGET
 // ==============================
 
-// Save or update the logged-in user's budget for the current month
+// Save or update a budget for the selected month
 app.post("/api/budgets", async (req, res) => {
     const userId = req.session.userId;
     const amount = Number(req.body.amount);
@@ -314,14 +314,30 @@ app.post("/api/budgets", async (req, res) => {
         });
     }
 
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const month = req.body.month || currentMonth;
+
+    if (
+        typeof month !== "string" ||
+        !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid month. Use YYYY-MM format."
+        });
+    }
+
+    const startDate = `${month}-01`;
+
     try {
         const [existingBudgets] = await db.execute(
             `SELECT budget_id
              FROM budgets
              WHERE user_id = ?
-               AND budget_month = DATE_FORMAT(CURDATE(), '%Y-%m-01')
+               AND budget_month = ?
+             ORDER BY budget_id DESC
              LIMIT 1`,
-            [userId]
+            [userId, startDate]
         );
 
         if (existingBudgets.length > 0) {
@@ -334,16 +350,20 @@ app.post("/api/budgets", async (req, res) => {
         } else {
             await db.execute(
                 `INSERT INTO budgets (user_id, amount, budget_month)
-                 VALUES (?, ?, DATE_FORMAT(CURDATE(), '%Y-%m-01'))`,
-                [userId, amount]
+                 VALUES (?, ?, ?)`,
+                [userId, amount, startDate]
             );
         }
 
         res.status(200).json({
             success: true,
             message: "Monthly budget saved successfully.",
-            budget: { amount }
+            budget: {
+                amount,
+                month
+            }
         });
+
     } catch (error) {
         console.error("Save budget error:", error.message);
 
@@ -354,7 +374,8 @@ app.post("/api/budgets", async (req, res) => {
     }
 });
 
-// Get the logged-in user's budget and current-month spending
+
+// Get the budget and spending for the selected month
 app.get("/api/budgets", async (req, res) => {
     const userId = req.session.userId;
 
@@ -365,15 +386,30 @@ app.get("/api/budgets", async (req, res) => {
         });
     }
 
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const month = req.query.month || currentMonth;
+
+    if (
+        typeof month !== "string" ||
+        !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid month. Use YYYY-MM format."
+        });
+    }
+
+    const startDate = `${month}-01`;
+
     try {
         const [budgetRows] = await db.execute(
             `SELECT amount
              FROM budgets
              WHERE user_id = ?
-               AND budget_month = DATE_FORMAT(CURDATE(), '%Y-%m-01')
+               AND budget_month = ?
              ORDER BY budget_id DESC
              LIMIT 1`,
-            [userId]
+            [userId, startDate]
         );
 
         const [spendingRows] = await db.execute(
@@ -381,12 +417,9 @@ app.get("/api/budgets", async (req, res) => {
              FROM transactions
              WHERE user_id = ?
                AND LOWER(type) = 'expense'
-               AND transaction_date >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
-               AND transaction_date < DATE_ADD(
-                   DATE_FORMAT(CURDATE(), '%Y-%m-01'),
-                   INTERVAL 1 MONTH
-               )`,
-            [userId]
+               AND transaction_date >= ?
+               AND transaction_date < DATE_ADD(?, INTERVAL 1 MONTH)`,
+            [userId, startDate, startDate]
         );
 
         const amount = budgetRows.length > 0
@@ -398,12 +431,14 @@ app.get("/api/budgets", async (req, res) => {
 
         res.json({
             success: true,
+            month,
             budget: {
                 amount,
                 spent,
                 remaining
             }
         });
+
     } catch (error) {
         console.error("Load budget error:", error.message);
 

@@ -2,116 +2,72 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Monthly Budget</title>
 
-    <!-- Use the existing project stylesheet -->
     <link rel="stylesheet" href="style.css">
-
 </head>
-
 
 <body>
 
-<!-- ================================
-     HEADER
-================================= -->
-
 <header class="main-header">
-
     <div class="header-content">
-
         <div>
-
             <h1>Student Budget Tracker</h1>
-
             <p>Set and manage your monthly spending budget.</p>
-
         </div>
 
         <a href="login.html" class="login-link">Login</a>
-
     </div>
-
 </header>
 
-
-<!-- ================================
-     NAVIGATION
-================================= -->
-
 <nav class="navigation">
-
     <div class="nav-container">
-
         <a href="index.html">Dashboard</a>
-
-        <a href="budget.html" class="active">
-            Monthly Budget
-        </a>
-
+        <a href="budget.html" class="active">Monthly Budget</a>
         <a href="analytics.html">Analytics</a>
-
         <a href="goals.html">Goals</a>
-
         <a href="profile.html">Profile</a>
-
     </div>
-
 </nav>
-
-
-<!-- ================================
-     MAIN CONTENT
-================================= -->
 
 <main class="container">
 
-    <!-- PAGE INTRODUCTION -->
-
     <section class="welcome-section">
-
         <h2>Monthly Budget</h2>
-
         <p>
             Set a spending limit and keep track of how much you have left.
         </p>
-
     </section>
 
+    <!-- SELECT MONTH -->
 
-    <!-- ================================
-         SET BUDGET
-    ================================= -->
+    <section class="content-card">
+        <div class="form-group">
+            <label for="monthSelector">Select Month</label>
+
+            <select id="monthSelector" required>
+                <option value="">Loading months...</option>
+            </select>
+        </div>
+    </section>
+
+    <!-- SET BUDGET -->
 
     <section class="content-card">
 
         <div class="section-title">
-
             <div>
-
                 <h2>Set Your Budget</h2>
-
-                <p>
-                    Enter the amount you plan to spend this month.
-                </p>
-
+                <p>Enter the amount you plan to spend for the selected month.</p>
             </div>
-
         </div>
-
 
         <form id="budgetForm" class="budget-form">
 
             <div class="form-group">
-
                 <label for="budgetAmount">
                     Monthly Budget Amount
                 </label>
@@ -120,13 +76,11 @@
                     type="number"
                     id="budgetAmount"
                     placeholder="Example: 1000"
-                    min="1"
+                    min="0.01"
                     step="0.01"
                     required
                 >
-
             </div>
-
 
             <button type="submit" class="primary-button">
                 Save Budget
@@ -134,100 +88,54 @@
 
         </form>
 
-
-        <!-- Message shown after saving or if there is an error -->
-
         <p id="budgetMessage" class="message"></p>
 
     </section>
 
-
-    <!-- ================================
-         CURRENT BUDGET
-    ================================= -->
+    <!-- CURRENT BUDGET -->
 
     <section class="content-card">
 
         <h2>Current Budget</h2>
 
         <p>
-            This section shows your monthly budget, how much you have
-            spent, and how much you have remaining.
+            This section shows your budget, expenses, and remaining amount
+            for the selected month.
         </p>
-
-
-        <!-- Budget summary -->
 
         <div class="budget-overview">
 
             <div>
-
                 <span>Monthly Budget</span>
-
-                <strong id="currentBudget">
-                    $1,000.00
-                </strong>
-
+                <strong id="currentBudget">$0.00</strong>
             </div>
 
-
             <div>
-
                 <span>Spent</span>
-
-                <strong id="budgetSpent">
-                    $600.00
-                </strong>
-
+                <strong id="budgetSpent">$0.00</strong>
             </div>
 
-
             <div>
-
                 <span>Remaining</span>
-
-                <strong id="budgetRemaining">
-                    $400.00
-                </strong>
-
+                <strong id="budgetRemaining">$0.00</strong>
             </div>
 
         </div>
 
-
-        <!-- Example values for the project -->
-
-        <p>
-            <strong>Example:</strong>
-            If your monthly budget is $1,000 and you have spent $600,
-            you have $400 remaining.
-        </p>
-
-
-        <!-- Budget progress bar -->
-
         <div class="progress-container large">
-
             <div
                 id="budgetPageProgress"
                 class="progress-bar"
             ></div>
-
         </div>
 
-
-        <!-- Budget status message -->
-
         <p id="budgetPageStatus" class="budget-status">
-            Set a budget to begin tracking your progress.
+            Select a month and set a budget to begin tracking your progress.
         </p>
 
     </section>
 
-
-    <!-- ================================
-         HOW THE BUDGET WORKS
-    ================================= -->
+    <!-- HOW THE BUDGET WORKS -->
 
     <section class="content-card">
 
@@ -245,37 +153,17 @@
 
     </section>
 
-
-    <!-- ================================
-         BACK TO DASHBOARD
-    ================================= -->
-
     <div class="back-link">
-
-        <a href="index.html">
-            ← Back to Dashboard
-        </a>
-
+        <a href="index.html">← Back to Dashboard</a>
     </div>
 
 </main>
 
-
-<!-- ================================
-     FOOTER
-================================= -->
-
 <footer>
-
     <p>Student Budget Tracker &copy; 2026</p>
-
 </footer>
 
-
-<!-- Project JavaScript save to -->
-
 <script src="app.js"></script>
-
 
 </body>
 </html>
