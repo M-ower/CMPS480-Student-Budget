@@ -24,7 +24,6 @@ const expenseBar = document.getElementById("expenseBar");
 const personalizedInsight = document.getElementById("personalizedInsight");
 const insightMessage = document.getElementById("insightMessage");
 const profileMonthSelector = document.getElementById("profileMonthSelector");
-const financialNotification = document.getElementById("financialNotification");
 
 
 // Set up January through December 2026
@@ -94,7 +93,7 @@ function showSpendingToast(income, expenses) {
     spendingToast.hidden = false;
 
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(hideSpendingToast, 6000);
+    toastTimer = setTimeout(hideSpendingToast, 10000);
 }
 
 
@@ -160,7 +159,6 @@ async function loadFinancialInsights() {
     const selectedMonth = profileMonthSelector.value;
 
     personalizedInsight.textContent = "Loading financial insights...";
-    financialNotification.textContent = "Checking your spending...";
     insightMessage.textContent = "";
 
     try {
@@ -254,30 +252,6 @@ async function loadFinancialInsights() {
                     : `Your monthly expenses exceed your income by $${Math.abs(balance).toFixed(2)}.`;
         }
 
-        // Financial notifications
-        if (income === 0 && expenses === 0) {
-            financialNotification.textContent =
-                "No financial activity recorded for this month.";
-
-        } else if (income === 0 && expenses > 0) {
-            financialNotification.textContent =
-                "Warning: You have recorded expenses but no income this month.";
-
-        } else if (expenses > income) {
-            financialNotification.textContent =
-                "Warning: Your expenses exceed your income this month.";
-
-        } else if (income > 0 && expenses >= income * 0.8) {
-            financialNotification.textContent =
-                "Caution: You've spent at least 80% of your recorded monthly income.";
-
-        } else {
-            financialNotification.textContent =
-                "Good job! Your recorded income is higher than your expenses this month.";
-        }
-
-        insightMessage.textContent = "";
-
     } catch (error) {
         if (selectedMonth !== profileMonthSelector.value) {
             return;
@@ -287,9 +261,6 @@ async function loadFinancialInsights() {
 
         personalizedInsight.textContent =
             "Unable to load financial insights.";
-
-        financialNotification.textContent =
-            "Notifications are currently unavailable.";
 
         insightMessage.textContent =
             "Unable to load financial data.";
