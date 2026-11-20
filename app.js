@@ -1,3 +1,4 @@
+
 // ============================================
 // STUDENT BUDGET TRACKER
 // Main JavaScript File
@@ -31,18 +32,23 @@ function getCurrentMonth() {
 }
 
 
-// Fill with the 12 calendar months
+// Fill with 24 calendar months (January 2026 - December 2027)
 function setupMonthSelector() {
     if (!monthSelector) return;
 
-    const currentYear = 2026;
+    const startYear = 2026;
+    const totalMonths = 24;
+
     monthSelector.innerHTML = "";
 
-    for (let month = 0; month < 12; month++) {
-        const date = new Date(currentYear, month, 1);
+    for (let i = 0; i < totalMonths; i++) {
+        const year = startYear + Math.floor(i / 12);
+        const month = (i % 12) + 1;
 
-        const value = currentYear + "-" +
-            String(month + 1).padStart(2, "0");
+        const date = new Date(year, month - 1, 1);
+
+        const value = year + "-" +
+            String(month).padStart(2, "0");
 
         const option = document.createElement("option");
         option.value = value;
@@ -66,9 +72,13 @@ function setupMonthSelector() {
     if (validSavedMonth) {
         monthSelector.value = savedMonth;
     } else {
-        monthSelector.value = currentMonth.startsWith("2026-")
+        const currentMonthOption = monthSelector.querySelector(
+            'option[value="' + currentMonth + '"]'
+        );
+
+        monthSelector.value = currentMonthOption
             ? currentMonth
-            : "2026-12";
+            : "2026-01";
     }
 
     monthSelector.addEventListener("change", function() {
@@ -241,8 +251,20 @@ if (transactionForm) {
         const amount = Number(document.getElementById("amount").value);
         const date = transactionDateInput.value;
 
-        if (!date || date < "2026-01-01" || date > "2026-12-31") {
-            alert("Please select a transaction date within 2026.");
+        const selectedMonth = monthSelector
+            ? monthSelector.value
+            : getCurrentMonth();
+
+        const firstDay = selectedMonth + "-01";
+
+        const [year, month] = selectedMonth.split("-").map(Number);
+        const lastDay = new Date(year, month, 0).getDate();
+
+        const lastDate = selectedMonth + "-" +
+            String(lastDay).padStart(2, "0");
+
+        if (!date || date < firstDay || date > lastDate) {
+            alert("Please select a transaction date within the selected month.");
             return;
         }
 
@@ -558,15 +580,12 @@ if (budgetForm) {
 // LOAD BUDGET DATA FROM THE DATABASE API
 // ============================================
 
-async function loadBudgetData() {
-    const month = monthSelector
-        ? monthSelector.value
-        : getCurrentMonth();
-
+async function loadBudgetData(month) {
     const response = await fetch(
         "/api/budgets?month=" + encodeURIComponent(month),
         {
-            credentials: "same-origin"
+            credentials: "same-origin",
+            cache: "no-store"
         }
     );
 
@@ -599,9 +618,10 @@ async function loadBudgetPage() {
             : getCurrentMonth();
 
         // Load the selected month's budget and spending
-        const budgetData = await loadBudgetData();
+        const budgetData = await loadBudgetData(month);
 
-        // Ignore outdated responses if the selected month changed
+        // Do not display data if the user selected another month
+        // while the request was loading.
         if (monthSelector && monthSelector.value !== month) {
             return;
         }
