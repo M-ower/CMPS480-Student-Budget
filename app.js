@@ -61,28 +61,18 @@ function setupMonthSelector() {
         monthSelector.appendChild(option);
     }
 
-    const currentMonth = getCurrentMonth();
-    const savedMonth = localStorage.getItem("selectedMonth");
+        // Automatically select the current month
+        const currentMonth = getCurrentMonth();
 
-    const validSavedMonth = savedMonth &&
-        monthSelector.querySelector(
-            'option[value="' + savedMonth + '"]'
-        );
-
-    if (validSavedMonth) {
-        monthSelector.value = savedMonth;
-    } else {
         const currentMonthOption = monthSelector.querySelector(
             'option[value="' + currentMonth + '"]'
         );
 
         monthSelector.value = currentMonthOption
-            ? currentMonth
-            : "2026-01";
-    }
+        ? currentMonth
+        : "2026-01";
 
-    monthSelector.addEventListener("change", function() {
-        localStorage.setItem("selectedMonth", monthSelector.value);
+        monthSelector.addEventListener("change", function() {
 
         if (transactionForm) {
             setDefaultTransactionDate();
