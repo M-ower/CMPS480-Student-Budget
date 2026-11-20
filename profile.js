@@ -24,6 +24,33 @@ const expenseBar = document.getElementById("expenseBar");
 const personalizedInsight = document.getElementById("personalizedInsight");
 const insightMessage = document.getElementById("insightMessage");
 
+
+const profileMonthSelector = document.getElementById("profileMonthSelector");
+const financialNotification = document.getElementById("financialNotification");
+
+// Populate January through December 2026
+function setupProfileMonthSelector() {
+    const currentMonth = new Date().getMonth();
+
+    profileMonthSelector.innerHTML = "";
+
+    for (let month = 0; month < 12; month++) {
+        const date = new Date(2026, month, 1);
+
+        const option = document.createElement("option");
+        option.value = `2026-${String(month + 1).padStart(2, "0")}`;
+        option.textContent = date.toLocaleString("en-US", {
+            month: "long",
+            year: "numeric"
+        });
+
+        profileMonthSelector.appendChild(option);
+    }
+
+    profileMonthSelector.value =
+        `2026-${String(currentMonth + 1).padStart(2, "0")}`;
+}
+
 function updateProfilePreview() {
     const name = displayNameInput.value.trim();
     const bio = bioInput.value.trim();
@@ -81,10 +108,18 @@ async function loadProfile() {
     }
 }
 
-// Load financial insights from the backend
 async function loadFinancialInsights() {
+    const selectedMonth = profileMonthSelector.value;
+
+    personalizedInsight.textContent = "Loading financial insights...";
+    financialNotification.textContent = "Checking your spending...";
+    insightMessage.textContent = "";
+
     try {
-        const response = await fetch("/api/analytics");
+        const response = await fetch(
+            `/api/transactions?month=${selectedMonth}`,
+            { credentials: "same-origin" }
+        );
 
         if (response.status === 401) {
             window.location.href = "login.html";
@@ -92,17 +127,37 @@ async function loadFinancialInsights() {
         }
 
         if (!response.ok) {
-            throw new Error("Failed to load financial insights");
+            throw new Error("Failed to load monthly transactions");
         }
 
         const data = await response.json();
-        const analytics = data.analytics;
+        const transactions = data.transactions;
 
-        const income = Number(analytics.income) || 0;
-        const expenses = Number(analytics.expenses) || 0;
+        if (!Array.isArray(transactions)) {
+            throw new Error("Invalid transaction data");
+        }
+
+        // Ignore an older response if the month changed
+        if (selectedMonth !== profileMonthSelector.value) {
+            return;
+        }
+
+        let income = 0;
+        let expenses = 0;
+
+        transactions.forEach(transaction => {
+            const amount = Number(transaction.amount) || 0;
+
+            if (transaction.type === "income") {
+                income += amount;
+            } else if (transaction.type === "expense") {
+                expenses += amount;
+            }
+        });
+
         const balance = income - expenses;
 
-        // Display income, expenses, and balance
+        // Update financial summary
         insightIncome.textContent = `$${income.toFixed(2)}`;
         insightExpenses.textContent = `$${expenses.toFixed(2)}`;
         insightBalance.textContent = `$${balance.toFixed(2)}`;
@@ -121,119 +176,76 @@ async function loadFinancialInsights() {
             ? `${(expenses / maxAmount) * 100}%`
             : "0%";
 
-        // Personalized message based on financial priority
+        // Personalized insight based on financial preference
         const priority = prioritySelect.value;
 
         if (income === 0 && expenses === 0) {
             personalizedInsight.textContent =
-                "Add some transactions to start receiving financial insights.";
+                "No transactions recorded for this month.";
 
         } else if (priority === "save_more") {
             personalizedInsight.textContent =
-                `Your goal is to save more money. You currently have $${balance.toFixed(2)} remaining after expenses. Consider putting some toward your savings goals.`;
+                `Your goal is to save more money. Your monthly balance is $${balance.toFixed(2)}. Consider setting aside some money for savings.`;
 
         } else if (priority === "reduce_spending") {
             if (income > 0) {
-                const spentPercent = (expenses / income) * 100;
+                const percentage = (expenses / income) * 100;
 
                 personalizedInsight.textContent =
-                    `Your goal is to reduce spending. You've spent ${spentPercent.toFixed(1)}% of your recorded income. Review your expenses to identify areas to cut back.`;
+                    `Your goal is to reduce spending. You've spent ${percentage.toFixed(1)}% of your monthly income.`;
             } else {
                 personalizedInsight.textContent =
-                    "Your goal is to reduce spending. Review your recorded expenses and add income to see how your spending compares.";
+                    "You have recorded expenses but no income this month. Review your spending.";
             }
 
         } else {
-            personalizedInsight.textContent = balance >= 0
-                ? `Your expenses are below your income. You're currently maintaining a positive balance of $${balance.toFixed(2)}.`
-                : `Your expenses exceed your income by $${Math.abs(balance).toFixed(2)}. Consider reviewing your spending to improve your balance.`;
+            personalizedInsight.textContent =
+                balance >= 0
+                    ? `You're maintaining a positive monthly balance of $${balance.toFixed(2)}.`
+                    : `Your monthly expenses exceed your income by $${Math.abs(balance).toFixed(2)}.`;
+        }
+
+        // Financial notifications
+        if (income === 0 && expenses === 0) {
+            financialNotification.textContent =
+                "No financial activity recorded for this month.";
+
+        } else if (income === 0 && expenses > 0) {
+            financialNotification.textContent =
+                "Warning: You have recorded expenses but no income this month.";
+
+        } else if (expenses > income) {
+            financialNotification.textContent =
+                "Warning: Your expenses exceed your income this month.";
+
+        } else if (income > 0 && expenses >= income * 0.8) {
+            financialNotification.textContent =
+                "Caution: You've spent at least 80% of your recorded monthly income.";
+
+        } else {
+            financialNotification.textContent =
+                "Good job! Your recorded income is higher than your expenses this month.";
         }
 
         insightMessage.textContent = "";
 
     } catch (error) {
-        console.error("Financial insights error:", error);
-        personalizedInsight.textContent =
-            "Unable to load your financial insights.";
-        insightMessage.textContent = "Unable to load financial data.";
-    }
-}
-
-
-// Load financial insights from MySQL through the backend
-async function loadFinancialInsights() {
-    try {
-        const response = await fetch("/api/analytics");
-
-        if (response.status === 401) {
-            window.location.href = "login.html";
+        if (selectedMonth !== profileMonthSelector.value) {
             return;
         }
 
-        if (!response.ok) {
-            throw new Error("Failed to load financial insights");
-        }
-
-        const data = await response.json();
-        const analytics = data.analytics;
-
-        const income = Number(analytics.income) || 0;
-        const expenses = Number(analytics.expenses) || 0;
-        const balance = Number(analytics.balance) || 0;
-
-        // Display financial summary
-        insightIncome.textContent = `$${income.toFixed(2)}`;
-        insightExpenses.textContent = `$${expenses.toFixed(2)}`;
-        insightBalance.textContent = `$${balance.toFixed(2)}`;
-
-        // Update income and expense chart
-        const maxAmount = Math.max(income, expenses);
-
-        incomeBar.style.width = maxAmount > 0
-            ? `${(income / maxAmount) * 100}%`
-            : "0%";
-
-        expenseBar.style.width = maxAmount > 0
-            ? `${(expenses / maxAmount) * 100}%`
-            : "0%";
-
-        // Personalized message based on saved preference
-        const priority = prioritySelect.value;
-
-        if (priority === "save_more") {
-            personalizedInsight.textContent =
-                `Your goal is to save more money. You currently have $${balance.toFixed(2)} remaining from your recorded income after expenses.`;
-
-        } else if (priority === "reduce_spending") {
-            const categories = analytics.categories || {};
-            const sortedCategories = Object.entries(categories)
-                .sort((a, b) => Number(b[1]) - Number(a[1]));
-
-            if (sortedCategories.length > 0) {
-                const [category, amount] = sortedCategories[0];
-
-                personalizedInsight.textContent =
-                    `Your goal is to reduce spending. Your largest expense category is ${category}, totaling $${Number(amount).toFixed(2)}.`;
-            } else {
-                personalizedInsight.textContent =
-                    "Your goal is to reduce spending. Add some expenses to see where most of your money goes.";
-            }
-
-        } else {
-            personalizedInsight.textContent =
-                `Your goal is to maintain balance. Your recorded income is $${income.toFixed(2)} and your expenses are $${expenses.toFixed(2)}. Your current balance is $${balance.toFixed(2)}.`;
-        }
-
-        insightMessage.textContent = "";
-
-    } catch (error) {
         console.error("Financial insights error:", error);
+
         personalizedInsight.textContent =
-            "Unable to load your financial insights.";
-        insightMessage.textContent = "Unable to load financial data.";
+            "Unable to load financial insights.";
+
+        financialNotification.textContent =
+            "Notifications are currently unavailable.";
+
+        insightMessage.textContent =
+            "Unable to load financial data.";
     }
 }
-
 
 // Save changes to MySQL through the backend
 profileForm.addEventListener("submit", async function(event) {
@@ -313,10 +325,15 @@ priorityForm.addEventListener("submit", async function(event) {
 });
 
     // Load profile first, then financial insights
-    async function initializeProfile() {
-        await loadProfile();
-        await loadFinancialInsights();
+   async function initializeProfile() {
+    setupProfileMonthSelector();
+    await loadProfile();
+    await loadFinancialInsights();
 }
+
+profileMonthSelector.addEventListener("change", loadFinancialInsights);
+
+
 
 // Logout button
 const logoutButton = document.getElementById("logoutButton");
