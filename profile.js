@@ -26,6 +26,33 @@ const insightMessage = document.getElementById("insightMessage");
 const profileMonthSelector = document.getElementById("profileMonthSelector");
 const financialNotification = document.getElementById("financialNotification");
 
+
+// Set up January through December 2026
+function setupProfileMonthSelector() {
+    const currentMonth = new Date().getMonth();
+
+    profileMonthSelector.innerHTML = "";
+
+    for (let month = 0; month < 12; month++) {
+        const date = new Date(2026, month, 1);
+
+        const option = document.createElement("option");
+
+        option.value = `2026-${String(month + 1).padStart(2, "0")}`;
+
+        option.textContent = date.toLocaleString("en-US", {
+            month: "long",
+            year: "numeric"
+        });
+
+        profileMonthSelector.appendChild(option);
+    }
+
+    profileMonthSelector.value =
+        `2026-${String(currentMonth + 1).padStart(2, "0")}`;
+}
+
+
 // Floating spending notification
 const spendingToast = document.getElementById("spendingToast");
 const toastTitle = document.getElementById("toastTitle");
@@ -377,9 +404,10 @@ logoutButton.addEventListener("click", async () => {
     }
 });
 
-    initializeProfile();
     profileMonthSelector.addEventListener("change", () => {
     hideSpendingToast();
     showToastOnLoad = false;
     loadFinancialInsights();
 });
+
+initializeProfile();
