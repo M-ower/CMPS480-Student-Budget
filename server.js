@@ -287,6 +287,7 @@ app.delete("/api/transactions", async (req, res) => {
             success: false,
             message: "Could not clear transactions."
         });
+        
     }
 });
 
