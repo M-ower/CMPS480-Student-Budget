@@ -26,29 +26,34 @@ const insightMessage = document.getElementById("insightMessage");
 const profileMonthSelector = document.getElementById("profileMonthSelector");
 
 
-// Set up January through December 2026
+// Set up January 2026 through December 2027
 function setupProfileMonthSelector() {
     const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
 
     profileMonthSelector.innerHTML = "";
 
-    for (let month = 0; month < 12; month++) {
-        const date = new Date(2026, month, 1);
+    for (let year = 2026; year <= 2027; year++) {
+        for (let month = 0; month < 12; month++) {
+            const date = new Date(year, month, 1);
+            const option = document.createElement("option");
 
-        const option = document.createElement("option");
+            option.value =
+                `${year}-${String(month + 1).padStart(2, "0")}`;
 
-        option.value = `2026-${String(month + 1).padStart(2, "0")}`;
+            option.textContent = date.toLocaleString("en-US", {
+                month: "long",
+                year: "numeric"
+            });
 
-        option.textContent = date.toLocaleString("en-US", {
-            month: "long",
-            year: "numeric"
-        });
-
-        profileMonthSelector.appendChild(option);
+            profileMonthSelector.appendChild(option);
+        }
     }
 
-    profileMonthSelector.value =
-        `2026-${String(currentMonth + 1).padStart(2, "0")}`;
+    const selectedMonth =
+        `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}`;
+
+    profileMonthSelector.value = selectedMonth;
 }
 
 
