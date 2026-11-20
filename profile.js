@@ -59,7 +59,6 @@ const toastMessage = document.getElementById("toastMessage");
 const toastClose = document.getElementById("toastClose");
 
 let toastTimer;
-let showToastOnLoad = true;
 
 function hideSpendingToast() {
     spendingToast.hidden = true;
@@ -69,10 +68,11 @@ function hideSpendingToast() {
 toastClose.addEventListener("click", hideSpendingToast);
 
 function showSpendingToast(income, expenses) {
-    // Only show automatically on the initial Profile load
-    if (!showToastOnLoad) return;
-    showToastOnLoad = false;
 
+    // Hide any previous notification
+    hideSpendingToast();
+
+    // Only show if expenses reach 80% of income
     if (income <= 0 || expenses < income * 0.8) return;
 
     spendingToast.classList.remove("warning", "caution");
@@ -92,10 +92,10 @@ function showSpendingToast(income, expenses) {
 
     spendingToast.hidden = false;
 
+    // Automatically hide after 10 seconds
     clearTimeout(toastTimer);
     toastTimer = setTimeout(hideSpendingToast, 10000);
 }
-
 
 function updateProfilePreview() {
     const name = displayNameInput.value.trim();
@@ -377,7 +377,6 @@ logoutButton.addEventListener("click", async () => {
 
     profileMonthSelector.addEventListener("change", () => {
     hideSpendingToast();
-    showToastOnLoad = false;
     loadFinancialInsights();
 });
 
