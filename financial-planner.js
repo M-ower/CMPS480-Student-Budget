@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (
             !transactionDate ||
             transactionDate < "2026-01-01" ||
-            transactionDate > "2026-12-31"
+            transactionDate > "2027-12-31"
             ){
             alert("Please select a planner date within 2026.");
             return;
