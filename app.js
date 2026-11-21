@@ -594,7 +594,9 @@ async function loadBudgetData(month) {
     }
 
     return data.budget;
+    
 }
+
 
 
 // ============================================
@@ -635,8 +637,13 @@ async function loadBudgetPage() {
             budgetSpent.textContent = formatMoney(expenses);
         }
 
+        // Show a dash when no monthly budget has been set.
+        // Otherwise, display the actual remaining amount.
+
         if (budgetRemaining) {
-            budgetRemaining.textContent = formatMoney(remaining);
+            budgetRemaining.textContent = monthlyBudget <= 0
+                ? "-"
+                : formatMoney(remaining);
         }
 
         updateBudgetProgress(
