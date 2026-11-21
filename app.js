@@ -37,7 +37,7 @@ function setupMonthSelector() {
     if (!monthSelector) return;
 
     const startYear = 2026;
-    const totalMonths = 12;
+    const totalMonths = 24;
 
     monthSelector.innerHTML = "";
 
