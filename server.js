@@ -316,17 +316,16 @@ app.post("/api/budgets", async (req, res) => {
         });
     }
 
-    // Only allow months in 2026
+    // Allow months from January 2026 to December 2027
     if (
         typeof month !== "string" ||
-        !/^2026-(0[1-9]|1[0-2])$/.test(month)
+        !/^202[67]-(0[1-9]|1[0-2])$/.test(month)
     ) {
         return res.status(400).json({
             success: false,
-            message: "Please select a valid month in 2026."
+            message: "Please select a valid month between 2026 and 2027."
         });
     }
-
     const startDate = `${month}-01`;
 
     // Debug: confirm which user's monthly budget is being saved
@@ -379,14 +378,14 @@ app.get("/api/budgets", async (req, res) => {
     const currentMonth = new Date().toISOString().slice(0, 7);
     const month = req.query.month || currentMonth;
 
-    // Only allow months in 2026
+    // Only allow months in 2026 to December 2027
     if (
         typeof month !== "string" ||
-        !/^2026-(0[1-9]|1[0-2])$/.test(month)
+        !/^202[67]-(0[1-9]|1[0-2])$/.test(month)
     ) {
         return res.status(400).json({
             success: false,
-            message: "Please select a valid month in 2026."
+            message: "Please select a valid between 2026 and 2027."
         });
     }
 
