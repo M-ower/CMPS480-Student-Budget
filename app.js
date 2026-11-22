@@ -83,6 +83,9 @@ function setupMonthSelector() {
         if (budgetForm) {
             loadBudgetPage();
         }
+        if (document.getElementById("categoryList")) {
+            loadAnalytics();
+        }
     });
 }
 
@@ -680,10 +683,16 @@ async function loadAnalytics() {
     }
 
     try {
-        const response = await fetch("/api/analytics", {
+        const selectedMonth = monthSelector
+        ? monthSelector.value
+        : getCurrentMonth();
+    
+    const response = await fetch(
+        `/api/analytics?month=${encodeURIComponent(selectedMonth)}`,
+        {
             credentials: "same-origin"
-        });
-
+        }
+    );
         const data = await response.json();
 
         if (!response.ok || !data.success || !data.analytics) {

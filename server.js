@@ -583,10 +583,10 @@ app.get("/api/goals", async (req, res) => {
 // ANALYTICS
 // ==============================
 
+
 app.get("/api/analytics", async (req, res) => {
     const userId = req.session.userId;
 
-    // Only allow logged-in users to view their analytics
     if (!userId) {
         return res.status(401).json({
             success: false,
@@ -594,28 +594,41 @@ app.get("/api/analytics", async (req, res) => {
         });
     }
 
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const month = req.query.month || currentMonth;
+
+    if (
+        typeof month !== "string" ||
+        !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)
+    ) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid month. Use YYYY-MM format."
+        });
+    }
+
+    const startDate = `${month}-01`;
+
+    // Get income and expenses for the selected month
     try {
-        // Get total income and expenses for this user
         const [summaryRows] = await db.execute(
             `SELECT
                 COALESCE(SUM(
-                    CASE
-                        WHEN LOWER(type) = 'income' THEN amount
-                        ELSE 0
-                    END
+                    CASE WHEN LOWER(type) = 'income'
+                    THEN amount ELSE 0 END
                 ), 0) AS income,
                 COALESCE(SUM(
-                    CASE
-                        WHEN LOWER(type) = 'expense' THEN amount
-                        ELSE 0
-                    END
+                    CASE WHEN LOWER(type) = 'expense'
+                    THEN amount ELSE 0 END
                 ), 0) AS expenses
              FROM transactions
-             WHERE user_id = ?`,
-            [userId]
+             WHERE user_id = ?
+               AND transaction_date >= ?
+               AND transaction_date < DATE_ADD(?, INTERVAL 1 MONTH)`,
+            [userId, startDate, startDate]
         );
 
-        // Get expense totals grouped by category
+        // Get expense totals by category for the selected month
         const [categoryRows] = await db.execute(
             `SELECT
                 c.name AS category,
@@ -625,36 +638,33 @@ app.get("/api/analytics", async (req, res) => {
                 ON t.category_id = c.category_id
              WHERE t.user_id = ?
                AND LOWER(t.type) = 'expense'
+               AND t.transaction_date >= ?
+               AND t.transaction_date < DATE_ADD(?, INTERVAL 1 MONTH)
              GROUP BY c.category_id, c.name
              ORDER BY total DESC`,
-            [userId]
+            [userId, startDate, startDate]
         );
 
-        // Get this user's budget for the current month
+        // Get the budget for the selected month
         const [budgetRows] = await db.execute(
             `SELECT amount
              FROM budgets
              WHERE user_id = ?
-               AND budget_month =
-                   DATE_FORMAT(CURDATE(), '%Y-%m-01')
+               AND budget_month = ?
              ORDER BY budget_id DESC
              LIMIT 1`,
-            [userId]
+            [userId, startDate]
         );
 
-        // Calculate expenses for the current month only
+        // Get monthly spending for the selected month
         const [monthlyExpenseRows] = await db.execute(
             `SELECT COALESCE(SUM(amount), 0) AS spent
              FROM transactions
              WHERE user_id = ?
                AND LOWER(type) = 'expense'
-               AND transaction_date >=
-                   DATE_FORMAT(CURDATE(), '%Y-%m-01')
-               AND transaction_date < DATE_ADD(
-                   DATE_FORMAT(CURDATE(), '%Y-%m-01'),
-                   INTERVAL 1 MONTH
-               )`,
-            [userId]
+               AND transaction_date >= ?
+               AND transaction_date < DATE_ADD(?, INTERVAL 1 MONTH)`,
+            [userId, startDate, startDate]
         );
 
         const income = Number(summaryRows[0].income);
@@ -665,17 +675,17 @@ app.get("/api/analytics", async (req, res) => {
             ? Number(budgetRows[0].amount)
             : 0;
 
-        const monthlyExpenses =
-            Number(monthlyExpenseRows[0].spent);
+        const monthlyExpenses = Number(monthlyExpenseRows[0].spent);
 
         const categories = {};
 
-        categoryRows.forEach((row) => {
+        categoryRows.forEach(row => {
             categories[row.category] = Number(row.total);
         });
 
         res.json({
             success: true,
+            month,
             analytics: {
                 income,
                 expenses,
@@ -695,6 +705,7 @@ app.get("/api/analytics", async (req, res) => {
         });
     }
 });
+
 
 // ==============================
 // LOGIN
