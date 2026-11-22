@@ -1140,9 +1140,9 @@ function formatMoney(amount) {
 // START PAGE FUNCTIONS
 // ============================================
 
-// Initialize the month selector on the Dashboard
-// and the Budget page.
-if (transactionForm || budgetForm) {
+// Initialize the month selector on Dashboard,
+// Budget, and Analytics pages.
+if (transactionForm || budgetForm || document.getElementById("categoryList")) {
     setupMonthSelector();
 }
 
